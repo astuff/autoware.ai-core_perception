@@ -379,42 +379,42 @@ if (USE_CUDA)
   else ()
       message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
   endif ()
+endif ()
 
-  ### region_tlr_tensorflow ###
-  ####################################################################################################
-  find_package(TensorFlow QUIET)
+### region_tlr_tensorflow ###
+####################################################################################################
+find_package(TensorFlow QUIET)
 
-  if (TENSORFLOW_FOUND)
-      add_executable(region_tlr_tensorflow
-              nodes/region_tlr_tensorflow/region_tlr_tensorflow.cpp
-              nodes/region_tlr_tensorflow/region_tlr_tensorflow.h
-              )
+if (TENSORFLOW_FOUND)
+    add_executable(region_tlr_tensorflow
+            nodes/region_tlr_tensorflow/region_tlr_tensorflow.cpp
+            nodes/region_tlr_tensorflow/region_tlr_tensorflow.h
+            )
 
-      target_include_directories(region_tlr_tensorflow PRIVATE
-              ${catkin_INCLUDE_DIRS}
-              ${OpenCV_LIBRARIES}
-              )
+    target_include_directories(region_tlr_tensorflow PRIVATE
+            ${catkin_INCLUDE_DIRS}
+            ${OpenCV_LIBRARIES}
+            )
 
-      target_link_libraries(region_tlr_tensorflow
-              ${catkin_LIBRARIES}
-              ${OpenCV_LIBRARIES}
-              libcontext
-              )
+    target_link_libraries(region_tlr_tensorflow
+            ${catkin_LIBRARIES}
+            ${OpenCV_LIBRARIES}
+            libcontext
+            )
 
-      add_dependencies(region_tlr_tensorflow
-              ${catkin_EXPORTED_TARGETS}
-              ${trafficlight_recognizer_EXPORTED_TARGETS}
-              )
+    add_dependencies(region_tlr_tensorflow
+            ${catkin_EXPORTED_TARGETS}
+            ${trafficlight_recognizer_EXPORTED_TARGETS}
+            )
 
-      install(TARGETS region_tlr_tensorflow
-              ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-              LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-              RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-              )
+    install(TARGETS region_tlr_tensorflow
+            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+            )
 
-      catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
-          DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-  else ()
-      message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
-  endif ()
+    catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+else ()
+    message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
 endif ()
