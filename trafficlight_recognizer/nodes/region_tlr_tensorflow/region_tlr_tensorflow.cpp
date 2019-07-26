@@ -502,18 +502,12 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
   std::vector<int> already_drawn;
   for (const auto ctx: contexts)
   {
-    //ROS_INFO("***%d", ctx.closestLaneId);
+    // ROS_INFO("***%d", ctx.closestLaneId);
     if (std::find(already_drawn.begin(), already_drawn.end(), ctx.closestLaneId) != already_drawn.end()
       || ctx.closestLaneId == -1)
       continue;
 
     already_drawn.push_back(ctx.closestLaneId);
-
-    // Draw superimpose result on image
-
-    // circle(result_image, ctx.redCenter, ctx.lampRadius, CV_RGB(255, 0, 0), 1, 0);
-    // circle(result_image, ctx.yellowCenter, ctx.lampRadius, CV_RGB(255, 255, 0), 1, 0);
-    // circle(result_image, ctx.greenCenter, ctx.lampRadius, CV_RGB(0, 255, 0), 1, 0);
 
     // Draw recognition result on image
     switch (ctx.lightState)
@@ -605,7 +599,6 @@ int main(int argc, char *argv[])
 
   // Create RegionTLRTensorFlowROSNode class object and do initialization
   RegionTLRTensorFlowROSNode region_tlr_tensorflow_ros_node;
-//  ros::service::waitForService("recognize_light_state", -1);
   region_tlr_tensorflow_ros_node.srv_client = n.serviceClient<trafficlight_recognizer::RecognizeLightState>("recognize_light_state", false);
   region_tlr_tensorflow_ros_node.srv_client.waitForExistence();
 
