@@ -1,9 +1,26 @@
-#include "label_maker_gui.h"
-#include "file_system_operator.h"
-#include "ui_label_maker_gui.h"
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "label_maker_gui.h"  // NOLINT(build/include)
+#include "file_system_operator.h"  // NOLINT(build/include)
+#include "ui_label_maker_gui.h"  // NOLINT(build/include)
 
 #include <iostream>
 #include <map>
+#include <string>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -67,13 +84,13 @@ LabelMakerGui::LabelMakerGui(QWidget *parent) :
           SIGNAL(pressed()),
           this,
           SLOT(ResetSelection()));
-} // LabelMakerGui::LabelMakerGui()
+}  // LabelMakerGui::LabelMakerGui()
 
 
 LabelMakerGui::~LabelMakerGui()
 {
   delete ui_;
-} // LabelMakerGui::~LabelMakerGui()
+}  // LabelMakerGui::~LabelMakerGui()
 
 
 QString LabelMakerGui::GetTargetDirectoryPath()
@@ -104,7 +121,8 @@ QString LabelMakerGui::GetTargetDirectoryPath()
       error_message = "\"Images\" direcotry cannnot be found in \"" +
                       path + "\". \n\n" +
                       "Make sure DataSet directory surely exists. \n" +
-                      "Or Execute \"rosrun trafficlight_recognizer roi_extractor\" first in order to create dataset source ";
+                      "Or Execute \"rosrun trafficlight_recognizer roi_extractor\"" +
+                      "first in order to create dataset source ";
 
       QMessageBox::warning(this,
                            "ERROR",
@@ -113,7 +131,7 @@ QString LabelMakerGui::GetTargetDirectoryPath()
   }
 
   return path;
-} // QString LabelMakerGui::GetTargetDirectoryPath() {
+}  // QString LabelMakerGui::GetTargetDirectoryPath() {
 
 
 void LabelMakerGui::ResetRadioButtonsBackGround()
@@ -219,10 +237,10 @@ bool LabelMakerGui::SaveCurrentState()
 
   // Get image property
   QSize image_size = ui_->graphics_view_->GetImageSize();
-  int image_depth = 3; // This program assume input image is color (3 channel) image
+  int image_depth = 3;  // This program assume input image is color (3 channel) image
 
   // Save specified state into file
-  file_system_operator_.WriteStateToFile("Images", // Image file should be under "Image" directory
+  file_system_operator_.WriteStateToFile("Images",  // Image file should be under "Image" directory
                                          image_list_[current_image_id],
                                          state,
                                          image_size.height(),

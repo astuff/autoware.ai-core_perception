@@ -1,22 +1,40 @@
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <vector>
-#include <float.h>
-#include <math.h>
+#include <cfloat>
+#include <cmath>
 #include <sstream>
+#include <string>
+
 #include <ros/ros.h>
+#include <autoware_msgs/Signals.h>
+#include <autoware_msgs/TrafficLight.h>
+#include <autoware_msgs/TrafficLightResult.h>
+#include <autoware_msgs/TrafficLightResultArray.h>
+#include <autoware_msgs/TunedResult.h>
 #include <cv_bridge/cv_bridge.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <autoware_msgs/TrafficLight.h>
-#include <autoware_msgs/Signals.h>
-#include <autoware_msgs/TunedResult.h>
-#include <autoware_msgs/TrafficLightResultArray.h>
-#include <autoware_msgs/TrafficLightResult.h>
 
 #include "TrafficLight.h"
 #include "RegionTLR.h"
@@ -134,7 +152,8 @@ static void putResult_inText(cv::Mat *image, const std::vector<Context> &context
     {
       label += " RIGHT";
     }
-    //add lane # text
+
+    // add lane # text
     label += " " + std::to_string(ctx.closestLaneId);
 
     cv::getTextSize(label,
@@ -154,7 +173,7 @@ static void putResult_inText(cv::Mat *image, const std::vector<Context> &context
             fontThickness,
             CV_AA);
   }
-} /* static void putResult_inText() */
+}  // static void putResult_inText()
 
 
 static void image_raw_cb(const sensor_msgs::Image &image_source)
@@ -190,16 +209,14 @@ static void image_raw_cb(const sensor_msgs::Image &image_source)
   /* Display superimpose result image in separate window*/
   if (show_superimpose_result)
   {
-    if (cvGetWindowHandle(window_name.c_str()) !=
-        NULL) // Guard not to write destroyed window by using close button on the window
+    // Guard not to write destroyed window by using close button on the window
+    if (cvGetWindowHandle(window_name.c_str()) != NULL)
     {
       imshow(window_name, targetScope);
       cv::waitKey(5);
     }
   }
-
-} /* static void image_raw_cb() */
-
+}  // static void image_raw_cb()
 
 static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr &extractedPos)
 {
@@ -242,14 +259,12 @@ static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr &extractedPos
 
     if (state_msg.traffic_light != TRAFFIC_LIGHT_UNKNOWN)
       break;  // publish the first state in detector.contexts
-
   }
 
   if (state_msg.traffic_light != prev_state)
   {
     signalState_pub.publish(state_msg);
     signalStateString_pub.publish(state_string_msg);
-
   }
   else
   {
@@ -355,15 +370,15 @@ static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr &extractedPos
     mk_green.pose.orientation.w = 0.0;
 
     /* Set the scale of the marker -- We assume lamp radius as 30cm */
-    mk_red.scale.x = (double) 0.3;
-    mk_red.scale.y = (double) 0.3;
-    mk_red.scale.z = (double) 0.3;
-    mk_yellow.scale.x = (double) 0.3;
-    mk_yellow.scale.y = (double) 0.3;
-    mk_yellow.scale.z = (double) 0.3;
-    mk_green.scale.x = (double) 0.3;
-    mk_green.scale.y = (double) 0.3;
-    mk_green.scale.z = (double) 0.3;
+    mk_red.scale.x = static_cast<double>(0.3);
+    mk_red.scale.y = static_cast<double>(0.3);
+    mk_red.scale.z = static_cast<double>(0.3);
+    mk_yellow.scale.x = static_cast<double>(0.3);
+    mk_yellow.scale.y = static_cast<double>(0.3);
+    mk_yellow.scale.z = static_cast<double>(0.3);
+    mk_green.scale.x = static_cast<double>(0.3);
+    mk_green.scale.y = static_cast<double>(0.3);
+    mk_green.scale.z = static_cast<double>(0.3);
 
     /* Set the color */
     switch (ctx.lightState)
@@ -403,8 +418,7 @@ static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr &extractedPos
   signal_state_array_publisher_.publish(tlr_result_array_msg);
 
   prev_state = state_msg.traffic_light;
-} /* static void extractedPos_cb() */
-
+}  // static void extractedPos_cb()
 
 static void tunedResult_cb(const autoware_msgs::TunedResult &msg)
 {
@@ -428,9 +442,7 @@ static void tunedResult_cb(const autoware_msgs::TunedResult &msg)
   thSet.Green.Sat.lower = cvtInt2Double_sat(msg.Green.Sat.center, -msg.Green.Sat.range);
   thSet.Green.Val.upper = cvtInt2Double_val(msg.Green.Val.center, msg.Green.Val.range);
   thSet.Green.Val.lower = cvtInt2Double_val(msg.Green.Val.center, -msg.Green.Val.range);
-
-} /* static void tunedResult_cb() */
-
+}  // static void tunedResult_cb()
 
 static void superimpose_cb(const std_msgs::Bool::ConstPtr &config_msg)
 {
@@ -450,12 +462,10 @@ static void superimpose_cb(const std_msgs::Bool::ConstPtr &config_msg)
       cv::waitKey(1);
     }
   }
-
-} /* static void superimpose_cb() */
+}  // static void superimpose_cb()
 
 int main(int argc, char *argv[])
 {
-
   //  printf("***** Traffic lights app *****\n");
 #ifdef SHOW_DEBUG_INFO
   cv::namedWindow("tmpImage", cv::WINDOW_NORMAL);
@@ -463,27 +473,26 @@ int main(int argc, char *argv[])
   cv::startWindowThread();
 #endif
 
-  thSet.Red.Hue.upper = (double) DAYTIME_RED_UPPER;
-  thSet.Red.Hue.lower = (double) DAYTIME_RED_LOWER;
+  thSet.Red.Hue.upper = static_cast<double>(DAYTIME_RED_UPPER);
+  thSet.Red.Hue.lower = static_cast<double>(DAYTIME_RED_LOWER);
   thSet.Red.Sat.upper = 1.0f;
   thSet.Red.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Red.Val.upper = 1.0f;
   thSet.Red.Val.lower = DAYTIME_V_SIGNAL_THRESHOLD;
 
-  thSet.Yellow.Hue.upper = (double) DAYTIME_YELLOW_UPPER;
-  thSet.Yellow.Hue.lower = (double) DAYTIME_YELLOW_LOWER;
+  thSet.Yellow.Hue.upper = static_cast<double>(DAYTIME_YELLOW_UPPER);
+  thSet.Yellow.Hue.lower = static_cast<double>(DAYTIME_YELLOW_LOWER);
   thSet.Yellow.Sat.upper = 1.0f;
   thSet.Yellow.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Yellow.Val.upper = 1.0f;
   thSet.Yellow.Val.lower = DAYTIME_V_SIGNAL_THRESHOLD;
 
-  thSet.Green.Hue.upper = (double) DAYTIME_GREEN_UPPER;
-  thSet.Green.Hue.lower = (double) DAYTIME_GREEN_LOWER;
+  thSet.Green.Hue.upper = static_cast<double>(DAYTIME_GREEN_UPPER);
+  thSet.Green.Hue.lower = static_cast<double>(DAYTIME_GREEN_LOWER);
   thSet.Green.Sat.upper = 1.0f;
   thSet.Green.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Green.Val.upper = 1.0f;
   thSet.Green.Val.lower = DAYTIME_V_SIGNAL_THRESHOLD;
-
 
   ros::init(argc, argv, "region_tlr");
 
@@ -499,16 +508,19 @@ int main(int argc, char *argv[])
   ros::Subscriber tunedResult_sub = n.subscribe("/tuned_result", 1, tunedResult_cb);
   ros::Subscriber superimpose_sub = n.subscribe("/config/superimpose", 1, superimpose_cb);
 
-  signalState_pub = n.advertise<autoware_msgs::TrafficLight>(camera_light_color_topic_name, ADVERTISE_QUEUE_SIZE, ADVERTISE_LATCH);
-  signalStateString_pub = n.advertise<std_msgs::String>("/sound_player", ADVERTISE_QUEUE_SIZE);
-  marker_pub = n.advertise<visualization_msgs::MarkerArray>("tlr_result", ADVERTISE_QUEUE_SIZE);
-  superimpose_image_pub = n.advertise<sensor_msgs::Image>("tlr_superimpose_image", ADVERTISE_QUEUE_SIZE);
+  signalState_pub = n.advertise<autoware_msgs::TrafficLight>(
+      camera_light_color_topic_name, ADVERTISE_QUEUE_SIZE, ADVERTISE_LATCH);
+  signalStateString_pub = n.advertise<std_msgs::String>(
+      "/sound_player", ADVERTISE_QUEUE_SIZE);
+  marker_pub = n.advertise<visualization_msgs::MarkerArray>(
+      "tlr_result", ADVERTISE_QUEUE_SIZE);
+  superimpose_image_pub = n.advertise<sensor_msgs::Image>(
+      "tlr_superimpose_image", ADVERTISE_QUEUE_SIZE);
 
-  signal_state_array_publisher_ = n.advertise<autoware_msgs::TrafficLightResultArray>("tlr_result_array", ADVERTISE_QUEUE_SIZE);
+  signal_state_array_publisher_ = n.advertise<autoware_msgs::TrafficLightResultArray>(
+      "tlr_result_array", ADVERTISE_QUEUE_SIZE);
 
   ros::spin();
 
   return 0;
-} /* int main() */
-
-
+}  // int main()

@@ -1,6 +1,25 @@
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "TrafficLight.h"
 #include "RegionTLR.h"
 #include "TrafficLightDetector.h"
+
+#include <algorithm>
+#include <vector>
 
 #define BLACK CV_RGB(0, 0, 0)
 #define WHITE CV_RGB(255, 255, 255)
@@ -13,7 +32,7 @@ struct regionCandidate
   bool   isBlacked;
 };
 
-//#define SHOW_DEBUG_INFO
+// #define SHOW_DEBUG_INFO
 extern thresholdSet thSet;      // declared in traffic_light_lkf.cpp
 
 /*
@@ -39,11 +58,11 @@ static inline  bool IsRange(const double lower, const double upper, const double
 } /* static inline  bool IsRange() */
 
 
-static void colorExtraction(const cv::Mat& src, // input HSV image
-                            cv::Mat*       dst, // specified color extracted binarized image
-                            const double   hue_lower, const double hue_upper, // hue thresholds
-                            const double   sat_lower, const double sat_upper, // satulation thresholds
-                            const double   val_lower, const double val_upper) // value thresholds
+static void colorExtraction(const cv::Mat& src,  // input HSV image
+                            cv::Mat*       dst,  // specified color extracted binarized image
+                            const double   hue_lower, const double hue_upper,  // hue thresholds
+                            const double   sat_lower, const double sat_upper,  // satulation thresholds
+                            const double   val_lower, const double val_upper)  // value thresholds
 {
   /* create imput image copy */
   cv::Mat input_img = src.clone();
@@ -75,17 +94,13 @@ static void colorExtraction(const cv::Mat& src, // input HSV image
   /* create mask */
   bitwise_and(channels[0], channels[1], *dst);
   bitwise_and(*dst, channels[2], *dst);
-
-
 } /* static void colorExtraction() */
-
 
 static bool checkExtinctionLight(const cv::Mat&  src_img,
                                  const cv::Point top_left,
                                  const cv::Point bot_right,
                                  const cv::Point bright_center)
 {
-
   /* check whether new roi is included by source image */
   cv::Point roi_top_left;
   roi_top_left.x = (top_left.x < 0) ? 0 :
@@ -108,7 +123,10 @@ static bool checkExtinctionLight(const cv::Mat&  src_img,
   split(roi_HSV, hsv_channel);
 
   int anchor = 3;
-  cv::Mat kernel = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2 * anchor + 1, 2 * anchor + 1), cv::Point(anchor, anchor));
+  cv::Mat kernel = getStructuringElement(
+      cv::MORPH_ELLIPSE,
+      cv::Size(2 * anchor + 1, 2 * anchor + 1),
+      cv::Point(anchor, anchor));
 
   cv::Mat topHat_dark;
   morphologyEx(hsv_channel[2], topHat_dark, cv::MORPH_TOPHAT, kernel, cv::Point(anchor, anchor), 5);
@@ -138,9 +156,8 @@ static bool checkExtinctionLight(const cv::Mat&  src_img,
     double perimeter = arcLength(dark_contours.at(contours_idx), true);
     double circleLevel = (IsNearlyZero(perimeter)) ? 0.0f : (4.0f * CV_PI * area / pow(perimeter, 2));
 
-    if (std::max(bound.width, bound.height) < 2 * std::min(bound.width, bound.height) && // dimension ratio
-        CIRCLE_LEVEL_THRESHOLD <= circleLevel)                                         // round enough
-
+    if (std::max(bound.width, bound.height) < 2 * std::min(bound.width, bound.height) &&  // dimension ratio
+        CIRCLE_LEVEL_THRESHOLD <= circleLevel)                                            // round enough
     {
       isThere_dark = true;
       // std::cerr << "there is dark region" << std::endl;
@@ -152,15 +169,14 @@ static bool checkExtinctionLight(const cv::Mat&  src_img,
   }
 
   return isThere_dark;
-
 } /* static bool checkExtinctionLight() */
 
 
 static cv::Mat signalDetect_inROI(const cv::Mat& roi,
-                                  const cv::Mat&     src_img,
-                                  const double       estimatedRadius,
+                                  const cv::Mat& src_img,
+                                  const double estimatedRadius,
                                   const cv::Point roi_topLeft,
-                                  bool in_turn_signal //if true it will not try to mask by using "circularity""
+                                  bool in_turn_signal  // if true it will not try to mask by using "circularity""
                                  )
 {
   /* reduce noise */
@@ -214,15 +230,17 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi,
     cv::Rect bound = boundingRect(bright_contours.at(contours_idx));
     cv::Scalar rangeColor = BLACK;
     struct regionCandidate cnd;
-    double area = contourArea(bright_contours.at(contours_idx)); // unit : pixel
+    double area = contourArea(bright_contours.at(contours_idx));  // unit : pixel
     double perimeter = arcLength(bright_contours.at(contours_idx), true);
     double circleLevel = (IsNearlyZero(perimeter)) ? 0.0f : (4.0f * CV_PI * area / pow(perimeter, 2));
 
-    double area_lower_limit = (3 * sqrt(3)) * pow(estimatedRadius / 3.0, 2) / 4; // the area of inscribed triangle of 1/3 circle
-    double area_upper_limit = pow(estimatedRadius, 2) * M_PI;                  // the area of the circle
+    // the area of inscribed triangle of 1/3 circle
+    double area_lower_limit = (3 * sqrt(3)) * pow(estimatedRadius / 3.0, 2) / 4;
+    // the area of the circle
+    double area_upper_limit = pow(estimatedRadius, 2) * M_PI;
 
-    if (std::max(bound.width, bound.height) < 2 * std::min(bound.width, bound.height) && /* dimension ratio */
-        CIRCLE_LEVEL_THRESHOLD <= circleLevel                                       &&
+    if (std::max(bound.width, bound.height) < 2 * std::min(bound.width, bound.height) &&  /* dimension ratio */
+        CIRCLE_LEVEL_THRESHOLD <= circleLevel &&
         area_lower_limit <= area && area <= area_upper_limit)
     {
       // std::cerr << "circleLevel: " << circleLevel << std::endl;
@@ -327,7 +345,6 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi,
     /* fill region of non-candidate */
     for (unsigned int i = 0; i < candidates.size(); i++)
     {
-
       if (candidates.at(i).isBlacked)
         continue;
 
@@ -351,17 +368,13 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi,
   }
 
   return bright_mask;
+}  // static void signalDetect_inROI()
 
-} /* static void signalDetect_inROI() */
-
-
-/* constructor for non initialize value */
+// constructor for non initialize value
 TrafficLightDetector::TrafficLightDetector() {}
-
 
 void TrafficLightDetector::brightnessDetect(const cv::Mat &input)
 {
-
   cv::Mat tmpImage;
   input.copyTo(tmpImage);
 
@@ -450,7 +463,8 @@ void TrafficLightDetector::brightnessDetect(const cv::Mat &input)
       }
     }
 
-    // std::cout << "(green, yellow, red) / valid = (" << green_pixNum << ", " << yellow_pixNum << ", " << red_pixNum << ") / " << valid_pixNum <<std::endl;
+    // std::cout << "(green, yellow, red) / valid = (" << green_pixNum << ", ";
+    // std::cout << yellow_pixNum << ", " << red_pixNum << ") / " << valid_pixNum << std::endl;
 
     bool isRed_bright;
     bool isYellow_bright;
@@ -458,9 +472,9 @@ void TrafficLightDetector::brightnessDetect(const cv::Mat &input)
 
     if (valid_pixNum > 0)
     {
-      isRed_bright    = (((double)red_pixNum / valid_pixNum)    > 0.5) ? true : false;
-      isYellow_bright = (((double)yellow_pixNum / valid_pixNum) > 0.5) ? true : false;
-      isGreen_bright  = (((double)green_pixNum / valid_pixNum)  > 0.5) ? true : false;
+      isRed_bright = ((static_cast<double>(red_pixNum) / valid_pixNum)    > 0.5) ? true : false;
+      isYellow_bright = ((static_cast<double>(yellow_pixNum) / valid_pixNum) > 0.5) ? true : false;
+      isGreen_bright = ((static_cast<double>(green_pixNum) / valid_pixNum)  > 0.5) ? true : false;
     }
     else
     {
@@ -470,7 +484,10 @@ void TrafficLightDetector::brightnessDetect(const cv::Mat &input)
     }
 
     int currentLightsCode = getCurrentLightsCode(isRed_bright, isYellow_bright, isGreen_bright);
-    contexts.at(i).lightState = determineState(contexts.at(i).lightState, currentLightsCode, &(contexts.at(i).stateJudgeCount));
+    contexts.at(i).lightState = determineState(
+        contexts.at(i).lightState,
+        currentLightsCode,
+        &(contexts.at(i).stateJudgeCount));
 
     roi.setTo(cv::Scalar(0));
   }
@@ -478,7 +495,6 @@ void TrafficLightDetector::brightnessDetect(const cv::Mat &input)
 
 double getBrightnessRatioInCircle(const cv::Mat &input, const cv::Point center, const int radius)
 {
-
   int whitePoints = 0;
   int blackPoints = 0;
 
@@ -492,19 +508,25 @@ double getBrightnessRatioInCircle(const cv::Mat &input, const cv::Point center, 
       }
     }
   }
-  //printf("Ratio: %f\n", ((double)whitePoints) / (whitePoints + blackPoints));
-  //std::cout << "(" << center.x << ", " << center.y << ") "<< "  white:" << whitePoints << " black: " << blackPoints << std::endl;
-  return ((double)whitePoints) / (whitePoints + blackPoints);
+  // printf("Ratio: %f\n", ((double)whitePoints) / (whitePoints + blackPoints));
+  // std::cout << "(" << center.x << ", " << center.y << ") ";
+  // std::cout << "  white:" << whitePoints << " black: " << blackPoints << std::endl;
+  return (static_cast<double>(whitePoints)) / (whitePoints + blackPoints);
 }
 
 int getCurrentLightsCode(bool display_red, bool display_yellow, bool display_green)
 {
-  return (int)display_red + 2 * ((int) display_yellow) + 4 * ((int) display_green);
+  return static_cast<int>(display_red) + 2 * static_cast<int>(display_yellow) + 4 * static_cast<int>(display_green);
 }
 
 LightState determineState(LightState previousState, int currentLightsCode, int* stateJudgeCount)
 {
-  //printf("Previous state: %d, currentCode: %d, Switched state to %d\n", previousState, currentLightsCode, STATE_TRANSITION_MATRIX[previousState][currentLightsCode]);
+  // printf("Previous state: %d,
+  //        currentCode: %d,
+  //        Switched state to %d\n",
+  //        previousState,
+  //        currentLightsCode,
+  //        STATE_TRANSITION_MATRIX[previousState][currentLightsCode]);
   LightState current = STATE_TRANSITION_MATRIX[previousState][currentLightsCode];
 
   if (current == UNDEFINED)
@@ -533,7 +555,6 @@ LightState determineState(LightState previousState, int currentLightsCode, int* 
  */
 void TrafficLightDetector::colorDetect(const cv::Mat &input, cv::Mat &output, const cv::Rect coords, int Hmin, int Hmax)
 {
-
   if (input.channels() != 3)
   {
     return;

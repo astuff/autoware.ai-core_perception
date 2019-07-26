@@ -1,10 +1,28 @@
-#include "file_system_operator.h"
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "file_system_operator.h"  // NOLINT(build/include)
 
 #include <sys/stat.h>
 #include <dirent.h>
 
 #include <fstream>
+#include <map>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <tinyxml.h>
@@ -14,11 +32,9 @@ FileSystemOperator::FileSystemOperator():
 {
 }
 
-
 FileSystemOperator::~FileSystemOperator()
 {
 }
-
 
 // The function to return std::map structure which contains
 // image ID and its filename in the specified directory path
@@ -38,7 +54,6 @@ std::map<int, std::string> FileSystemOperator::GetImageList(const std::string di
     if (stat(absolute_path.c_str(), &status) == 0 &&
         S_ISREG(status.st_mode))   // This entry is surely nomal file
     {
-
       // Get file ID by erasing file extension
       int file_id = GetFileIDFromFilePath(entry->d_name);
 
@@ -51,7 +66,6 @@ std::map<int, std::string> FileSystemOperator::GetImageList(const std::string di
 
   return list;
 }  // std::map<int, std::string> FileSystemOperation::GetImageList()
-
 
 void FileSystemOperator::CheckPreSavedData(std::string target_dir_name)
 {
@@ -144,16 +158,19 @@ void FileSystemOperator::WriteStateToFile(std::string folder_name,
     int y_end)
 {
   int image_id = GetFileIDFromFilePath(file_name);
-  LabelData label_data{folder_name,
-                       file_name,
-                       state,
-                       image_height,
-                       image_width,
-                       image_depth,
-                       x_start,
-                       y_start,
-                       x_end,
-                       y_end};
+  LabelData label_data
+  {
+    folder_name,
+    file_name,
+    state,
+    image_height,
+    image_width,
+    image_depth,
+    x_start,
+    y_start,
+    x_end,
+    y_end
+  };
 
   // Insert specified data into data list (if this ID's data already exist, it will be overwritten)
   label_data_list_[image_id] = label_data;

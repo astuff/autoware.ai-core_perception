@@ -1,30 +1,44 @@
 /*
- * signals.cpp
- *
- *  Created on: Apr 9, 2015
- *      Author: sujiwo
- */
+ * Copyright 2015 sujiwo
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
 
-
-#include <iostream>
-#include <ros/ros.h>
-#include "Rate.h"
+#include "libvectormap/Math.h"
 #include "libvectormap/vector_map.h"
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <geometry_msgs/TwistStamped.h>
+#include "Rate.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <iostream>
+#include <map>
+#include <signal.h>
+#include <string>
+
+#include <Eigen/Eigen>
+
+#include <autoware_msgs/AdjustXY.h>
+#include <autoware_msgs/Lane.h>
+#include <autoware_msgs/Signals.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <signal.h>
-#include <cstdio>
-#include "libvectormap/Math.h"
-#include <Eigen/Eigen>
-#include <autoware_msgs/Signals.h>
-#include <autoware_msgs/AdjustXY.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <ros/ros.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
 #include <vector_map/vector_map.h>
 #include <vector_map_server/GetSignal.h>
-#include <autoware_msgs/Lane.h>
 
 static std::string camera_id_str;
 
@@ -38,10 +52,12 @@ typedef struct
   double thiX;
   double thiY;
   double thiZ;
-} Angle;
+}
+Angle;
 
 static VectorMap vmap;
-//static Angle cameraOrientation; // camera orientation = car's orientation
+// camera orientation = car's orientation
+// static Angle cameraOrientation;
 
 static Eigen::Vector3f position;
 static Eigen::Quaternionf orientation;
@@ -53,7 +69,7 @@ static float fx,
        cy;
 static tf::StampedTransform trf;
 
-static bool g_use_vector_map_server; // Switch flag whether vecter-map-server function will be used
+static bool g_use_vector_map_server;  // Switch flag whether vecter-map-server function will be used
 static ros::ServiceClient g_ros_client;
 
 #define SignalLampRadius 0.3
@@ -95,10 +111,10 @@ public:
   {
     waypoints_ = waypoints;
   }
-}; // Class VectorMapClient
-} // namespace
-static VectorMapClient g_vector_map_client;
+};  // Class VectorMapClient
+}  // namespace
 
+static VectorMapClient g_vector_map_client;
 
 /* Callback function to shift projection result */
 void adjust_xyCallback(const autoware_msgs::AdjustXY::ConstPtr &config_msg)
@@ -162,6 +178,7 @@ void cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr camInfoMsg)
   check if lower < val < upper
   This function also considers circulation
 */
+
 static bool isRange(const double lower, const double upper, const double val)
 {
   if (lower <= upper)
@@ -203,14 +220,12 @@ void getTransform(Eigen::Quaternionf &ori, Point3 &pos)
   ori.z() = o.z();
 }
 
-
 Point3 transform(const Point3 &psrc, tf::StampedTransform &tfsource)
 {
   tf::Vector3 pt3(psrc.x(), psrc.y(), psrc.z());
   tf::Vector3 pt3s = tfsource * pt3;
   return Point3(pt3s.x(), pt3s.y(), pt3s.z());
 }
-
 
 /*
  * Project a point from world coordinate to image plane
@@ -244,12 +259,10 @@ double ConvertDegreeToRadian(double degree)
   return degree * M_PI / 180.0f;
 }
 
-
 double ConvertRadianToDegree(double radian)
 {
   return radian * 180.0f / M_PI;
 }
-
 
 double GetSignalAngleInCameraSystem(double hang, double vang)
 {
@@ -270,7 +283,6 @@ double GetSignalAngleInCameraSystem(double hang, double vang)
 
   return ConvertRadianToDegree(signal_pitch_in_cam);   // holizontal angle of camera is represented by pitch
 }  // double GetSignalAngleInCameraSystem()
-
 
 void echoSignals2(ros::Publisher &pub, bool useOpenGLCoord = false)
 {
@@ -327,17 +339,17 @@ void echoSignals2(ros::Publisher &pub, bool useOpenGLCoord = false)
       int radius;
       int ux, vx;
       project2(signalcenterx, ux, vx, useOpenGLCoord);
-      radius = (int) distance(ux, vx, u, v);
+      radius = static_cast<int>(distance(ux, vx, u, v));
 
       autoware_msgs::ExtractedPosition sign;
       sign.signalId = signal.id;
 
-      sign.u = u + adjust_proj_x; // shift project position by configuration value from runtime manager
-      sign.v = v + adjust_proj_y; // shift project position by configuration value from runtime manager
+      sign.u = u + adjust_proj_x;  // shift project position by configuration value from runtime manager
+      sign.v = v + adjust_proj_y;  // shift project position by configuration value from runtime manager
 
       sign.radius = radius;
       sign.x = signalcenter.x(), sign.y = signalcenter.y(), sign.z = signalcenter.z();
-      sign.hang = vmap.vectors[signal.vid].hang; // hang is expressed in [0, 360] degree
+      sign.hang = vmap.vectors[signal.vid].hang;  // hang is expressed in [0, 360] degree
       sign.type = signal.type, sign.linkId = signal.linkid;
       sign.plId = signal.plid;
 
@@ -359,17 +371,14 @@ void echoSignals2(ros::Publisher &pub, bool useOpenGLCoord = false)
   std::cout << "There are " << signalsInFrame.Signals.size() << " signals in range" << std::endl;
 }
 
-
 void interrupt(int s)
 {
   ros::shutdown();
   exit(1);
 }
 
-
 int main(int argc, char *argv[])
 {
-
   ros::init(argc, argv, "feat_proj", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode;
   ros::NodeHandle private_nh("~");
@@ -475,5 +484,4 @@ int main(int argc, char *argv[])
     prev_position = position;
     loop.sleep();
   }
-
 }
