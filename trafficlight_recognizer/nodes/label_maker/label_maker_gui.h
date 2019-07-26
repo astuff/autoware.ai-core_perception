@@ -11,8 +11,9 @@
 #include <QLabel>
 #include <QAbstractButton>
 
-namespace Ui {
-  class LabelMakerGui;
+namespace Ui
+{
+class LabelMakerGui;
 }
 
 class LabelMakerGui : public QMainWindow

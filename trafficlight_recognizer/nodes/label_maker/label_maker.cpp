@@ -2,7 +2,8 @@
 #include "label_maker_gui.h"
 #include <QApplication>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // ROS initialization
   ros::init(argc, argv, "label_maker");
 

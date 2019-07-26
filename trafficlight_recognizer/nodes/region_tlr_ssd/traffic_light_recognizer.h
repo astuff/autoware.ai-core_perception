@@ -9,8 +9,9 @@
 
 #include "Context.h"
 
-class TrafficLightRecognizer {
- public:
+class TrafficLightRecognizer
+{
+public:
   TrafficLightRecognizer();
   ~TrafficLightRecognizer();
   void Init(const std::string& network_definition_file_name,
@@ -20,7 +21,7 @@ class TrafficLightRecognizer {
 
   LightState RecognizeLightState(const cv::Mat& image);
 
- private:
+private:
   void WrapInputLayer(std::vector<cv::Mat>* input_channels);
   void Preprocess(const cv::Mat& image, std::vector<cv::Mat>* input_channels);
 

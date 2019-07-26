@@ -24,7 +24,8 @@ RegionTLRSSDROSNode::RegionTLRSSDROSNode():
   kTrafficLightUnknown(2),
   kStringRed("red signal"),
   kStringGreen("green signal"),
-  kStringUnknown("") {
+  kStringUnknown("")
+{
 
 } // RegionTLRSSDROSNode::RegionTLRSSDROSNode()
 
@@ -32,14 +33,16 @@ RegionTLRSSDROSNode::RegionTLRSSDROSNode():
 // ========================================
 // Destructor of RegionTLRSSDROSNode class
 // ========================================
-RegionTLRSSDROSNode::~RegionTLRSSDROSNode() {
+RegionTLRSSDROSNode::~RegionTLRSSDROSNode()
+{
 } // RegionTLRSSDROSNode::~RegionTLRSSDROSNode()
 
 
 // =========================
 // Start recognition process
 // =========================
-void RegionTLRSSDROSNode::RunRecognition() {
+void RegionTLRSSDROSNode::RunRecognition()
+{
   // Get execution parameters from ROS parameter server
   GetROSParam();
 
@@ -58,7 +61,8 @@ void RegionTLRSSDROSNode::RunRecognition() {
 // ==================================
 // Callback function to acquire image
 // ==================================
-void RegionTLRSSDROSNode::ImageRawCallback(const sensor_msgs::Image &image) {
+void RegionTLRSSDROSNode::ImageRawCallback(const sensor_msgs::Image &image)
+{
   cv_bridge::CvImagePtr cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
   frame_ = cv_image->image.clone();
 
@@ -70,11 +74,13 @@ void RegionTLRSSDROSNode::ImageRawCallback(const sensor_msgs::Image &image) {
 // ==========================================
 // Callback function to acquire extracted_pos
 // ==========================================
-void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstPtr &extracted_pos) {
+void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstPtr &extracted_pos)
+{
   static ros::Time previous_timestamp;
   // If frame has not been prepared, abort this callback
   if (frame_.empty() ||
-      frame_header_.stamp == previous_timestamp) {
+      frame_header_.stamp == previous_timestamp)
+  {
     std::cout << "No Image" << std::endl;
     return;
   }
@@ -84,10 +90,12 @@ void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstP
   Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols);
 
   // Recognize the color of the traffic light
-  for (Context& context: contexts_) {
-  // for (unsigned int i = 0; i < contexts_.size(); i++) {
-  //   Context& context = contexts_.at(i);
-    if (context.topLeft.x > context.botRight.x) {
+  for (Context& context : contexts_)
+  {
+    // for (unsigned int i = 0; i < contexts_.size(); i++) {
+    //   Context& context = contexts_.at(i);
+    if (context.topLeft.x > context.botRight.x)
+    {
       continue;
     }
 
@@ -96,7 +104,7 @@ void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstP
     cv::Mat roi  = frame_(cv::Rect(context.topLeft, context.botRight)).clone();
 
     //cv::imshow("ssd_tlr", roi);
-	//  cv::waitKey(200);
+    //  cv::waitKey(200);
 
     // Get current state of traffic light from current frame
     LightState current_state = recognizer.RecognizeLightState(roi);
@@ -104,7 +112,7 @@ void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstP
     // Determine the final state by referring previous state
     context.lightState = DetermineState(context.lightState, // previous state
                                         current_state,      // current state
-                                        &(context.stateJudgeCount)); // counter to record how many times does state recognized
+                                        & (context.stateJudgeCount)); // counter to record how many times does state recognized
   }
 
   // Publish recognition result as some topic format
@@ -120,7 +128,8 @@ void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstP
 // =======================================
 // Get parameter from ROS parameter server
 // =======================================
-void RegionTLRSSDROSNode::GetROSParam() {
+void RegionTLRSSDROSNode::GetROSParam()
+{
   ros::NodeHandle private_node_handle("~");
 
   private_node_handle.param<std::string>("image_raw_topic", image_topic_name_, "/image_raw");
@@ -131,12 +140,14 @@ void RegionTLRSSDROSNode::GetROSParam() {
 
   // If network-definition-file or pretrained-model-file are not specified,
   // terminate program with error status
-  if (network_definition_file_name_.empty()){
+  if (network_definition_file_name_.empty())
+  {
     ROS_FATAL("No Network Definition File was specified. Terminate program... ");
     exit(EXIT_FAILURE);
   }
 
-  if (pretrained_model_file_name_.empty()){
+  if (pretrained_model_file_name_.empty())
+  {
     ROS_FATAL("No Pretrained Model File was specified. Terminate program... ");
     exit(EXIT_FAILURE);
   }
@@ -146,18 +157,19 @@ void RegionTLRSSDROSNode::GetROSParam() {
 // ============================================================
 // Register subscriber and publisher of this node in ROS Master
 // ============================================================
-void RegionTLRSSDROSNode::StartSubscribersAndPublishers() {
+void RegionTLRSSDROSNode::StartSubscribersAndPublishers()
+{
   ros::NodeHandle node_handle;
-  
+
   // Register subscribers
   image_subscriber      = node_handle.subscribe(image_topic_name_,
-                                                1,
-                                                &RegionTLRSSDROSNode::ImageRawCallback,
-                                                this);
+                          1,
+                          &RegionTLRSSDROSNode::ImageRawCallback,
+                          this);
   roi_signal_subscriber = node_handle.subscribe("/roi_signal",
-                                                1,
-                                                &RegionTLRSSDROSNode::ROISignalCallback,
-                                                this);
+                          1,
+                          &RegionTLRSSDROSNode::ROISignalCallback,
+                          this);
 
   // Register publishers
   signal_state_publisher        = node_handle.advertise<autoware_msgs::TrafficLight>("light_color", 1);
@@ -172,17 +184,22 @@ void RegionTLRSSDROSNode::StartSubscribersAndPublishers() {
 // Determine the final recognition result by comparing previous recognition result
 // ===============================================================================
 LightState RegionTLRSSDROSNode::DetermineState(LightState previous_state,
-                                               LightState current_state,
-                                               int* state_judge_count) {
+    LightState current_state,
+    int* state_judge_count)
+{
   // Get a candidate which considering state transition of traffic light
   LightState transition_candidate = kStateTransitionMatrix[previous_state][current_state];
 
   // If state change happens more than threshold times, accept that change
-  if (*state_judge_count > kChangeStateThreshold) {
+  if (*state_judge_count > kChangeStateThreshold)
+  {
     *state_judge_count = 0;
     return transition_candidate;
-  } else {
-    if (transition_candidate != previous_state) {
+  }
+  else
+  {
+    if (transition_candidate != previous_state)
+    {
       (*state_judge_count)++;
     }
     return previous_state;
@@ -194,12 +211,15 @@ LightState RegionTLRSSDROSNode::DetermineState(LightState previous_state,
 // =================================================================
 // Publish recognition result as autoware_msgs::TrafficLight type
 // =================================================================
-void RegionTLRSSDROSNode::PublishTrafficLight(std::vector<Context> contexts) {
+void RegionTLRSSDROSNode::PublishTrafficLight(std::vector<Context> contexts)
+{
   autoware_msgs::TrafficLight topic;
   static int32_t previous_state = kTrafficLightUnknown;
   topic.traffic_light = kTrafficLightUnknown;
-  for (const auto ctx: contexts) {
-    switch(ctx.lightState) {
+  for (const auto ctx : contexts)
+  {
+    switch (ctx.lightState)
+    {
     case GREEN:
       topic.traffic_light = kTrafficLightGreen;
       break;
@@ -216,13 +236,15 @@ void RegionTLRSSDROSNode::PublishTrafficLight(std::vector<Context> contexts) {
     // which has largest estimated radius of signal.
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
-    if (topic.traffic_light != kTrafficLightUnknown) {
+    if (topic.traffic_light != kTrafficLightUnknown)
+    {
       break;
     }
   }
 
   // If state changes from previous one, publish it
-  if (topic.traffic_light != previous_state) {
+  if (topic.traffic_light != previous_state)
+  {
     signal_state_publisher.publish(topic);
     previous_state = topic.traffic_light;
   }
@@ -232,12 +254,15 @@ void RegionTLRSSDROSNode::PublishTrafficLight(std::vector<Context> contexts) {
 // =================================================================
 // Publish recognition result as std_msgs::String
 // =================================================================
-void RegionTLRSSDROSNode::PublishString(std::vector<Context> contexts) {
+void RegionTLRSSDROSNode::PublishString(std::vector<Context> contexts)
+{
   std_msgs::String topic;
   static std::string previous_state = kStringUnknown;
   topic.data = kStringUnknown;
-  for (const auto ctx: contexts) {
-    switch(ctx.lightState) {
+  for (const auto ctx : contexts)
+  {
+    switch (ctx.lightState)
+    {
     case GREEN:
       topic.data = kStringGreen;
       break;
@@ -254,13 +279,15 @@ void RegionTLRSSDROSNode::PublishString(std::vector<Context> contexts) {
     // which has largest estimated radius of signal.
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
-    if (topic.data != kStringUnknown) {
+    if (topic.data != kStringUnknown)
+    {
       break;
     }
   }
 
   // If state changes from previous one, publish it
-  if (topic.data != previous_state) {
+  if (topic.data != previous_state)
+  {
     signal_state_string_publisher.publish(topic);
     previous_state = topic.data;
   }
@@ -270,7 +297,8 @@ void RegionTLRSSDROSNode::PublishString(std::vector<Context> contexts) {
 // =================================================================
 // Publish recognition result as visualization_msgs::MarkerArray
 // =================================================================
-void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts) {
+void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts)
+{
   // Define color constants
   std_msgs::ColorRGBA color_black;
   color_black.r = 0.0f;
@@ -297,7 +325,8 @@ void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts) {
   color_green.a = 1.0f;
 
   // publish all result as ROS MarkerArray
-  for (const auto ctx: contexts) {
+  for (const auto ctx : contexts)
+  {
     visualization_msgs::MarkerArray signal_set;
     visualization_msgs::Marker red_light, yellow_light, green_light;
 
@@ -360,7 +389,8 @@ void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts) {
     green_light.scale.z = 0.3;
 
     // Set the color for each marker
-    switch(ctx.lightState) {
+    switch (ctx.lightState)
+    {
     case GREEN:
       red_light.color = color_black;
       yellow_light.color = color_black;
@@ -402,7 +432,8 @@ void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts) {
 // ================================================================
 // Publish superimpose and recognition result as sensor_msgs::Image
 // ================================================================
-void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts) {
+void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts)
+{
   // Copy the frame image for output
   cv::Mat result_image = frame_.clone();
 
@@ -413,14 +444,16 @@ void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts) {
   int          font_baseline  = 0;
   CvScalar     label_color;
 
-  for (const auto ctx: contexts_) {
+  for (const auto ctx : contexts_)
+  {
     // Draw superimpose result on image
     circle(result_image, ctx.redCenter, ctx.lampRadius, CV_RGB(255, 0, 0), 1, 0);
     circle(result_image, ctx.yellowCenter, ctx.lampRadius, CV_RGB(255, 255, 0), 1, 0);
     circle(result_image, ctx.greenCenter, ctx.lampRadius, CV_RGB(0, 255, 0), 1, 0);
 
     // Draw recognition result on image
-    switch(ctx.lightState) {
+    switch (ctx.lightState)
+    {
     case GREEN:
       label = "GREEN";
       label_color = CV_RGB(0, 255, 0);
@@ -447,7 +480,7 @@ void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts) {
       label += " RIGHT";
     }
     //add lane # text
-    label +=" " + std::to_string(ctx.closestLaneId);
+    label += " " + std::to_string(ctx.closestLaneId);
 
     cv::Point label_origin = cv::Point(ctx.topLeft.x, ctx.botRight.y + font_baseline);
 
@@ -466,7 +499,8 @@ void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts) {
 // ========================
 // Entry point of this node
 // ========================
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // Initialize ros node
   ros::init(argc, argv, "region_tlr_ssd");
 

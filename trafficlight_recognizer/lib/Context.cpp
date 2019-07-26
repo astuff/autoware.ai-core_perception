@@ -105,57 +105,57 @@ void Context::SetContexts(std::vector<Context> &out_signal_contexts,
       {
         switch (lamp_iterator->type)
         {
-          case 1:             /* RED */
-            current_signal_context.redCenter = cv::Point(img_x, img_y);
-            current_signal_context.redCenter3d = cv::Point3d(map_x, map_y, map_z);
-            break;
-          case 2:             /* GREEN */
-            current_signal_context.greenCenter = cv::Point(img_x, img_y);
-            current_signal_context.greenCenter3d = cv::Point3d(map_x, map_y, map_z);
-            break;
-          case 3:             /* YELLOW */
-            current_signal_context.yellowCenter = cv::Point(img_x, img_y);
-            current_signal_context.yellowCenter3d = cv::Point3d(map_x, map_y, map_z);
-            // use yellow light bulb signalID as this context's representative
-            current_signal_context.signalID = lamp_iterator->signalId;
-            if (id_swap)
-              current_signal_context.closestLaneId = lamp_iterator->linkId;
-            else
-              current_signal_context.closestLaneId = lamp_iterator->plId;
-            break;
-          case 21:            /*RED LEFT*/
-            current_signal_context.redCenter = cv::Point(img_x, img_y);
-            current_signal_context.redCenter3d = cv::Point3d(map_x, map_y, map_z);
-            current_signal_context.leftTurnSignal = true;
-            break;
-          case 22:            /*GREEN LEFT*/
-            current_signal_context.greenCenter = cv::Point(img_x, img_y);
-            current_signal_context.greenCenter3d = cv::Point3d(map_x, map_y, map_z);
-            current_signal_context.leftTurnSignal = true;
-            break;
-          case 23:            /*YELLOW LEFT*/
-            current_signal_context.yellowCenter = cv::Point(img_x, img_y);
-            current_signal_context.yellowCenter3d = cv::Point3d(map_x, map_y, map_z);
-            current_signal_context.leftTurnSignal = true;
-            // use yellow light bulb signalID as this context's representative
-            current_signal_context.signalID = lamp_iterator->signalId;
-            if (id_swap)
-              current_signal_context.closestLaneId = lamp_iterator->linkId;
-            else
-              current_signal_context.closestLaneId = lamp_iterator->plId;
-            break;
-          default:          /* this signal is not for cars (for pedestrian or something) */
-            continue;
+        case 1:             /* RED */
+          current_signal_context.redCenter = cv::Point(img_x, img_y);
+          current_signal_context.redCenter3d = cv::Point3d(map_x, map_y, map_z);
+          break;
+        case 2:             /* GREEN */
+          current_signal_context.greenCenter = cv::Point(img_x, img_y);
+          current_signal_context.greenCenter3d = cv::Point3d(map_x, map_y, map_z);
+          break;
+        case 3:             /* YELLOW */
+          current_signal_context.yellowCenter = cv::Point(img_x, img_y);
+          current_signal_context.yellowCenter3d = cv::Point3d(map_x, map_y, map_z);
+          // use yellow light bulb signalID as this context's representative
+          current_signal_context.signalID = lamp_iterator->signalId;
+          if (id_swap)
+            current_signal_context.closestLaneId = lamp_iterator->linkId;
+          else
+            current_signal_context.closestLaneId = lamp_iterator->plId;
+          break;
+        case 21:            /*RED LEFT*/
+          current_signal_context.redCenter = cv::Point(img_x, img_y);
+          current_signal_context.redCenter3d = cv::Point3d(map_x, map_y, map_z);
+          current_signal_context.leftTurnSignal = true;
+          break;
+        case 22:            /*GREEN LEFT*/
+          current_signal_context.greenCenter = cv::Point(img_x, img_y);
+          current_signal_context.greenCenter3d = cv::Point3d(map_x, map_y, map_z);
+          current_signal_context.leftTurnSignal = true;
+          break;
+        case 23:            /*YELLOW LEFT*/
+          current_signal_context.yellowCenter = cv::Point(img_x, img_y);
+          current_signal_context.yellowCenter3d = cv::Point3d(map_x, map_y, map_z);
+          current_signal_context.leftTurnSignal = true;
+          // use yellow light bulb signalID as this context's representative
+          current_signal_context.signalID = lamp_iterator->signalId;
+          if (id_swap)
+            current_signal_context.closestLaneId = lamp_iterator->linkId;
+          else
+            current_signal_context.closestLaneId = lamp_iterator->plId;
+          break;
+        default:          /* this signal is not for cars (for pedestrian or something) */
+          continue;
         }
         min_radius = (min_radius > radius) ? radius : min_radius;
         most_left = (most_left > img_x - radius - 1.5 * min_radius) ? img_x - radius - 1.5 * min_radius
-                                                                    : most_left;
+                    : most_left;
         most_top = (most_top > img_y - radius - 1.5 * min_radius) ? img_y - radius - 1.5 * min_radius
-                                                                  : most_top;
+                   : most_top;
         most_right = (most_right < img_x + radius + 1.5 * min_radius) ? img_x + radius + 1.5 * min_radius
-                                                                      : most_right;
+                     : most_right;
         most_bottom = (most_bottom < img_y + radius + 1.5 * min_radius) ? img_y + radius + 1.5 * min_radius
-                                                                        : most_bottom;
+                      : most_bottom;
       }  // end if check this lamp belong to this lane and visible
     }  // end for to check if the lamp belongs to the lane
 

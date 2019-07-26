@@ -12,14 +12,14 @@
 #include "region_tlr_tensorflow.h"
 
 RegionTLRTensorFlowROSNode::RegionTLRTensorFlowROSNode() :
-    image_topic_name_("/image_raw"),
-    kAdvertiseInLatch_(true),
-    kTrafficLightRed(0),
-    kTrafficLightGreen(1),
-    kTrafficLightUnknown(2),
-    kStringRed("red signal"),
-    kStringGreen("green signal"),
-    kStringUnknown("")
+  image_topic_name_("/image_raw"),
+  kAdvertiseInLatch_(true),
+  kTrafficLightRed(0),
+  kTrafficLightGreen(1),
+  kTrafficLightUnknown(2),
+  kStringRed("red signal"),
+  kStringGreen("green signal"),
+  kStringUnknown("")
 {
 }
 
@@ -40,13 +40,21 @@ void RegionTLRTensorFlowROSNode::ImageRawCallback(const sensor_msgs::ImageConstP
   auto se_frame = cv_bridge::toCvShare(msg);
 
   if (msg->encoding == "bgr8")
+  {
     cv::cvtColor(se_frame->image, frame_, cv::COLOR_BGR2RGB);
+  }
   else if (msg->encoding == "bayer_bggr8")
+  {
     cv::cvtColor(se_frame->image, frame_, cv::COLOR_BayerRG2RGB);
+  }
   else if (msg->encoding == "bayer_rggb8")
+  {
     cv::cvtColor(se_frame->image, frame_, cv::COLOR_BayerBG2RGB);
+  }
   else
+  {
     ROS_WARN("Received image of unhandled encoding type.");
+  }
 
   frame_header_ = msg->header;
 }
@@ -56,18 +64,16 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
   static ros::Time previous_timestamp;
 
   // Abort this callback if a new image is not available
-  if (frame_.empty() ||
-      frame_header_.stamp == previous_timestamp)
+  if (frame_.empty() || frame_header_.stamp == previous_timestamp)
     return;
 
   // Acquire signal position on the image
   Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols, swap_pole_lane_id);
 
-  // Recognize the color of the traffic light 
-  for (Context &context: contexts_)
+  // Recognize the color of the traffic light
+  for (Context &context : contexts_)
   {
-    if ( context.topLeft.x > context.botRight.x
-      || context.closestLaneId == -1 )
+    if (context.topLeft.x > context.botRight.x || context.closestLaneId == -1)
       continue;
 
     // Hack to fix ROI for a particular traffic light (right-most when crossing W. M. Kumpf Blvd.)
@@ -82,7 +88,8 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     std::vector<int> signal_ids_to_shift_2 = {29, 20, 81, 19, 38, 21, 30, 28, 80, 39, 37, 82,
                                               32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33,
                                               34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88,
-                                              66, 69, 72, 75, 78};
+                                              66, 69, 72, 75, 78
+                                             };
 
     if (std::find(signal_ids_to_shift_1.begin(), signal_ids_to_shift_1.end(), context.signalID) != signal_ids_to_shift_1.end())
     {
@@ -92,24 +99,40 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
       int new_br_y = context.botRight.y + 10;
 
       if (new_tl_x < 0)
+      {
         new_tl_x = 0;
+      }
       else if (new_tl_x >= frame_.cols)
+      {
         new_tl_x = frame_.cols - 1;
+      }
 
       if (new_br_x < 0)
+      {
         new_br_x = 0;
+      }
       else if (new_br_x >= frame_.cols)
+      {
         new_br_x = frame_.cols - 1;
+      }
 
       if (new_tl_y < 0)
+      {
         new_tl_y = 0;
+      }
       else if (new_tl_y >= frame_.rows)
+      {
         new_tl_y = frame_.rows - 1;
+      }
 
       if (new_br_y < 0)
+      {
         new_br_y = 0;
+      }
       else if (new_br_y >= frame_.rows)
+      {
         new_br_y = frame_.rows - 1;
+      }
 
       context.topLeft = cv::Point(new_tl_x, new_tl_y);
       context.botRight = cv::Point(new_br_x, new_br_y);
@@ -122,24 +145,40 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
       int new_br_y = context.botRight.y + 20;
 
       if (new_tl_x < 0)
+      {
         new_tl_x = 0;
+      }
       else if (new_tl_x >= frame_.cols)
+      {
         new_tl_x = frame_.cols - 1;
+      }
 
       if (new_br_x < 0)
+      {
         new_br_x = 0;
+      }
       else if (new_br_x >= frame_.cols)
+      {
         new_br_x = frame_.cols - 1;
+      }
 
       if (new_tl_y < 0)
+      {
         new_tl_y = 0;
+      }
       else if (new_tl_y >= frame_.rows)
+      {
         new_tl_y = frame_.rows - 1;
+      }
 
       if (new_br_y < 0)
+      {
         new_br_y = 0;
+      }
       else if (new_br_y >= frame_.rows)
+      {
         new_br_y = frame_.rows - 1;
+      }
 
       context.topLeft = cv::Point(new_tl_x, new_tl_y);
       context.botRight = cv::Point(new_br_x, new_br_y);
@@ -177,11 +216,15 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     // The state of the traffic light WON'T be changed
     // unless the new state is found at least change_state_threshold_ times
     if (confidence >= score_threshold_)
+    {
       DetermineState(current_state, context);
+    }
   }
 
   if (extracted_pos->Signals.size() == 0)
+  {
     std::cout << "No signals in the image" << std::endl;
+  }
   else
   {
     // Publish recognition result
@@ -225,9 +268,9 @@ void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
                                   this);
 
   roi_signal_subscriber = node_handle.subscribe("/roi_signal",
-                                                1,
-                                                &RegionTLRTensorFlowROSNode::ROISignalCallback,
-                                                this);
+                          1,
+                          &RegionTLRTensorFlowROSNode::ROISignalCallback,
+                          this);
 
   // Register publishers
   signal_state_publisher = node_handle.advertise<autoware_msgs::TrafficLight>("light_color", 1);
@@ -245,7 +288,7 @@ void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
  * @param in_out_signal_context the object containing the data of the current Traffic Light instance.
  */
 void RegionTLRTensorFlowROSNode::DetermineState(LightState in_current_state,
-                                           Context& in_out_signal_context)
+    Context& in_out_signal_context)
 {
   //if reported state by classifier is different than the previously stored
   if (in_current_state != in_out_signal_context.lightState)
@@ -261,8 +304,11 @@ void RegionTLRTensorFlowROSNode::DetermineState(LightState in_current_state,
     {
       //if classifier returned the same result previously, then increase its confidence
       in_out_signal_context.stateJudgeCount++;
+
       if (in_out_signal_context.stateJudgeCount > change_state_threshold_)
+      {
         in_out_signal_context.stateJudgeCount = change_state_threshold_;  // prevent overflow
+      }
 
       //if new candidate has been found enough times, change state to the new candidate
       if (in_out_signal_context.stateJudgeCount >= change_state_threshold_)
@@ -279,20 +325,20 @@ void RegionTLRTensorFlowROSNode::PublishTrafficLight(std::vector<Context> contex
   static int32_t previous_state = kTrafficLightUnknown;
   topic.traffic_light = kTrafficLightUnknown;
 
-  for (const auto ctx: contexts)
+  for (const auto ctx : contexts)
   {
     switch (ctx.lightState)
     {
-      case GREEN:
-        topic.traffic_light = kTrafficLightGreen;
-        break;
-      case YELLOW:
-      case RED:
-        topic.traffic_light = kTrafficLightRed;
-        break;
-      case UNDEFINED:
-        topic.traffic_light = kTrafficLightUnknown;
-        break;
+    case GREEN:
+      topic.traffic_light = kTrafficLightGreen;
+      break;
+    case YELLOW:  // Autoware currently treats yellow as red.
+    case RED:
+      topic.traffic_light = kTrafficLightRed;
+      break;
+    case UNDEFINED:
+      topic.traffic_light = kTrafficLightUnknown;
+      break;
     }
 
     // Publish the first state in contexts,
@@ -321,20 +367,20 @@ void RegionTLRTensorFlowROSNode::PublishString(std::vector<Context> contexts)
   std_msgs::String topic;
   static std::string previous_state = kStringUnknown;
   topic.data = kStringUnknown;
-  for (const auto ctx: contexts)
+  for (const auto ctx : contexts)
   {
     switch (ctx.lightState)
     {
-      case GREEN:
-        topic.data = kStringGreen;
-        break;
-      case YELLOW:
-      case RED:
-        topic.data = kStringRed;
-        break;
-      case UNDEFINED:
-        topic.data = kStringUnknown;
-        break;
+    case GREEN:
+      topic.data = kStringGreen;
+      break;
+    case YELLOW:  // Autoware currently treats yellow as red.
+    case RED:
+      topic.data = kStringRed;
+      break;
+    case UNDEFINED:
+      topic.data = kStringUnknown;
+      break;
     }
 
     // Publish the first state in contexts,
@@ -383,7 +429,7 @@ void RegionTLRTensorFlowROSNode::PublishMarkerArray(std::vector<Context> context
   color_green.a = 1.0f;
 
   // publish all result as ROS MarkerArray
-  for (const auto ctx: contexts)
+  for (const auto ctx : contexts)
   {
     visualization_msgs::MarkerArray signal_set;
     visualization_msgs::Marker red_light, yellow_light, green_light;
@@ -449,26 +495,26 @@ void RegionTLRTensorFlowROSNode::PublishMarkerArray(std::vector<Context> context
     // Set the color for each marker
     switch (ctx.lightState)
     {
-      case GREEN:
-        red_light.color = color_black;
-        yellow_light.color = color_black;
-        green_light.color = color_green;
-        break;
-      case YELLOW:
-        red_light.color = color_black;
-        yellow_light.color = color_yellow;
-        green_light.color = color_black;
-        break;
-      case RED:
-        red_light.color = color_red;
-        yellow_light.color = color_black;
-        green_light.color = color_black;
-        break;
-      case UNDEFINED:
-        red_light.color = color_black;
-        yellow_light.color = color_black;
-        green_light.color = color_black;
-        break;
+    case GREEN:
+      red_light.color = color_black;
+      yellow_light.color = color_black;
+      green_light.color = color_green;
+      break;
+    case YELLOW:
+      red_light.color = color_black;
+      yellow_light.color = color_yellow;
+      green_light.color = color_black;
+      break;
+    case RED:
+      red_light.color = color_red;
+      yellow_light.color = color_black;
+      green_light.color = color_black;
+      break;
+    case UNDEFINED:
+      red_light.color = color_black;
+      yellow_light.color = color_black;
+      green_light.color = color_black;
+      break;
     }
 
     red_light.lifetime = ros::Duration(0.1);
@@ -500,11 +546,11 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
   CvScalar label_color;
 
   std::vector<int> already_drawn;
-  for (const auto ctx: contexts)
+  for (const auto ctx : contexts)
   {
     // ROS_INFO("***%d", ctx.closestLaneId);
     if (std::find(already_drawn.begin(), already_drawn.end(), ctx.closestLaneId) != already_drawn.end()
-      || ctx.closestLaneId == -1)
+        || ctx.closestLaneId == -1)
       continue;
 
     already_drawn.push_back(ctx.closestLaneId);
@@ -512,21 +558,21 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
     // Draw recognition result on image
     switch (ctx.lightState)
     {
-      case GREEN:
-        label = "GREEN";
-        label_color = CV_RGB(0, 255, 0);
-        break;
-      case YELLOW:
-        label = "YELLOW";
-        label_color = CV_RGB(255, 255, 0);
-        break;
-      case RED:
-        label = "RED";
-        label_color = CV_RGB(255, 0, 0);
-        break;
-      case UNDEFINED:
-        label = "UNKNOWN";
-        label_color = CV_RGB(0, 0, 0);
+    case GREEN:
+      label = "GREEN";
+      label_color = CV_RGB(0, 255, 0);
+      break;
+    case YELLOW:
+      label = "YELLOW";
+      label_color = CV_RGB(255, 255, 0);
+      break;
+    case RED:
+      label = "RED";
+      label_color = CV_RGB(255, 0, 0);
+      break;
+    case UNDEFINED:
+      label = "UNKNOWN";
+      label_color = CV_RGB(0, 0, 0);
     }
 
     cv::rectangle(result_image, ctx.topLeft, ctx.botRight, label_color, 2);
@@ -548,22 +594,22 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
   }
 
   std_msgs::String topic;
-  for (const auto ctx: contexts)
+  for (const auto ctx : contexts)
   {
     switch (ctx.lightState)
     {
-      case GREEN:
-        topic.data = kStringGreen;
-        label_color = CV_RGB(0, 255, 0);
-        break;
-      case YELLOW:
-      case RED:
-        topic.data = kStringRed;
-        label_color = CV_RGB(255, 0, 0);
-        break;
-      case UNDEFINED:
-        topic.data = kStringUnknown;
-        label_color = CV_RGB(0, 0, 0);
+    case GREEN:
+      topic.data = kStringGreen;
+      label_color = CV_RGB(0, 255, 0);
+      break;
+    case YELLOW:  // Autoware currently treats yellow as red.
+    case RED:
+      topic.data = kStringRed;
+      label_color = CV_RGB(255, 0, 0);
+      break;
+    case UNDEFINED:
+      topic.data = kStringUnknown;
+      label_color = CV_RGB(0, 0, 0);
     }
 
     // Publish the first state in contexts,
@@ -571,7 +617,9 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
     if (topic.data != kStringUnknown)
+    {
       break;
+    }
   }
 
   // Add text with state of closest signal

@@ -25,7 +25,7 @@ public:
                           const autoware_msgs::Signals::ConstPtr &in_extracted_pos,
                           const int in_image_height,
                           const int in_image_width,
-                          const bool id_swap=false);
+                          const bool id_swap = false);
 
   cv::Point   redCenter;
   cv::Point   yellowCenter;

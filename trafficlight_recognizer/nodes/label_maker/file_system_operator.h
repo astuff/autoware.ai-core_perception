@@ -35,7 +35,8 @@ public:
 
 private:
   // The data structure to hold label data
-  struct LabelData {
+  struct LabelData
+  {
     std::string folder_name;
     std::string file_name;
     LightState state;

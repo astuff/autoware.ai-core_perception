@@ -10,29 +10,34 @@
 #include <tinyxml.h>
 
 FileSystemOperator::FileSystemOperator():
-  target_directory_path_("") {
+  target_directory_path_("")
+{
 }
 
 
-FileSystemOperator::~FileSystemOperator() {
+FileSystemOperator::~FileSystemOperator()
+{
 }
 
 
 // The function to return std::map structure which contains
 // image ID and its filename in the specified directory path
-std::map<int, std::string> FileSystemOperator::GetImageList(const std::string directory_path) {
+std::map<int, std::string> FileSystemOperator::GetImageList(const std::string directory_path)
+{
   std::map<int, std::string> list;
 
   struct dirent *entry;
   DIR *directory_handler = opendir(directory_path.c_str());
 
   // Check all contents in the specified directory
-  while ((entry = readdir(directory_handler)) != NULL) {
+  while ((entry = readdir(directory_handler)) != NULL)
+  {
     // Get entry's status (file name, permission...etc)
     struct stat status;
     std::string absolute_path = directory_path + std::string(entry->d_name);
     if (stat(absolute_path.c_str(), &status) == 0 &&
-        S_ISREG(status.st_mode)) { // This entry is surely nomal file
+        S_ISREG(status.st_mode))   // This entry is surely nomal file
+    {
 
       // Get file ID by erasing file extension
       int file_id = GetFileIDFromFilePath(entry->d_name);
@@ -48,33 +53,40 @@ std::map<int, std::string> FileSystemOperator::GetImageList(const std::string di
 }  // std::map<int, std::string> FileSystemOperation::GetImageList()
 
 
-void FileSystemOperator::CheckPreSavedData(std::string target_dir_name) {
+void FileSystemOperator::CheckPreSavedData(std::string target_dir_name)
+{
   target_directory_path_ = target_dir_name;
 
   // Check whether specified directory already exist
   struct stat directory_status;
-  if (stat(target_directory_path_.c_str(), &directory_status) == 0) {
+  if (stat(target_directory_path_.c_str(), &directory_status) == 0)
+  {
     // Specified directory already exist
     LoadPreSavedContents();
-  } else {
+  }
+  else
+  {
     // Newly create directory
     mkdir(target_directory_path_.c_str(), 0755);
   }
 }
 
 
-void FileSystemOperator::LoadPreSavedContents() {
+void FileSystemOperator::LoadPreSavedContents()
+{
   struct dirent *entry;
   DIR *directory_handler = opendir(target_directory_path_.c_str());
 
   // Load all annotation file data in the specified directory
-  while ((entry = readdir(directory_handler)) != NULL) {
+  while ((entry = readdir(directory_handler)) != NULL)
+  {
     // Get entry's status (file name, permission...etc)
     struct stat status;
     std::string absolute_path = target_directory_path_ + std::string(entry->d_name);
 
     if (stat(absolute_path.c_str(), &status) == 0 &&
-        S_ISREG(status.st_mode)) { // This entry is surely nomal file
+        S_ISREG(status.st_mode))   // This entry is surely nomal file
+    {
       LabelData loaded_data;
 
       // Open this xml file
@@ -121,26 +133,27 @@ void FileSystemOperator::LoadPreSavedContents() {
 
 
 void FileSystemOperator::WriteStateToFile(std::string folder_name,
-                                          std::string file_name,
-                                          LightState state,
-                                          int image_height,
-                                          int image_width,
-                                          int image_depth,
-                                          int x_start,
-                                          int y_start,
-                                          int x_end,
-                                          int y_end) {
+    std::string file_name,
+    LightState state,
+    int image_height,
+    int image_width,
+    int image_depth,
+    int x_start,
+    int y_start,
+    int x_end,
+    int y_end)
+{
   int image_id = GetFileIDFromFilePath(file_name);
   LabelData label_data{folder_name,
-        file_name,
-        state,
-        image_height,
-        image_width,
-        image_depth,
-        x_start,
-        y_start,
-        x_end,
-        y_end};
+                       file_name,
+                       state,
+                       image_height,
+                       image_width,
+                       image_depth,
+                       x_start,
+                       y_start,
+                       x_end,
+                       y_end};
 
   // Insert specified data into data list (if this ID's data already exist, it will be overwritten)
   label_data_list_[image_id] = label_data;
@@ -202,7 +215,8 @@ void FileSystemOperator::WriteStateToFile(std::string folder_name,
 
 // The utility function to get image ID from image file name
 // This function assumes that image files are named by its ID like "0.png, Images/1.png,..."
-int FileSystemOperator::GetFileIDFromFilePath(std::string path) {
+int FileSystemOperator::GetFileIDFromFilePath(std::string path)
+{
   // Extract only file name from path
   std::string file_name = path.substr(path.find_last_of("/") + 1);
 

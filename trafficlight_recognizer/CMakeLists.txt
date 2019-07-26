@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
         libvectormap
         message_generation
         roscpp
+        roslint
         rospy
         sensor_msgs
         std_msgs
@@ -38,6 +39,9 @@ if (NOT EIGEN3_FOUND)
 else ()
     set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif ()
+
+roslint_cpp()
+roslint_python()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -417,4 +421,8 @@ if (TENSORFLOW_FOUND)
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 else ()
     message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
+endif ()
+
+if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
 endif ()

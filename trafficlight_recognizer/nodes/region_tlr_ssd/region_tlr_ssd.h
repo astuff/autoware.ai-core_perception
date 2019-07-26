@@ -13,8 +13,9 @@
 #include "autoware_msgs/Signals.h"
 #include "traffic_light_recognizer.h"
 
-class RegionTLRSSDROSNode {
- public:
+class RegionTLRSSDROSNode
+{
+public:
   RegionTLRSSDROSNode();
   ~RegionTLRSSDROSNode();
 
@@ -25,16 +26,17 @@ class RegionTLRSSDROSNode {
   // The vector of data structure to save traffic light state, position, ...etc
   std::vector<Context> contexts_;
 
- private:
+private:
   /* Light state transition probably happen in Japanese traffic light */
-  const LightState kStateTransitionMatrix[4][4] = {
+  const LightState kStateTransitionMatrix[4][4] =
+  {
     /* current: */
     /* GREEN   , YELLOW    , RED    , UNDEFINED  */
     /* -------------------------------------------  */
-    {GREEN     , YELLOW    , YELLOW    , GREEN}  ,  /* | previous = GREEN */
-    {UNDEFINED , YELLOW    , RED       , YELLOW} ,  /* | previous = YELLOW */
-    {GREEN     , RED       , RED       , RED}    ,  /* | previous = RED */
-    {GREEN     , YELLOW    , RED       , UNDEFINED} /* | previous = UNDEFINED */
+    {GREEN, YELLOW, YELLOW, GREEN},                 /* | previous = GREEN */
+    {UNDEFINED, YELLOW, RED, YELLOW},               /* | previous = YELLOW */
+    {GREEN, RED, RED, RED},                         /* | previous = RED */
+    {GREEN, YELLOW, RED, UNDEFINED}                 /* | previous = UNDEFINED */
   };
 
 

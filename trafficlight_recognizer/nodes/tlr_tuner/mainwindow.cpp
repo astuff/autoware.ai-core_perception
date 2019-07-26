@@ -51,11 +51,12 @@ void MainWindow::on_pushButton_reloadImage_clicked()
 void MainWindow::on_pushButton_save_clicked()
 {
   QString fileName = QFileDialog::getSaveFileName(this,
-                                                  tr("Save tuning result"), "",
-                                                  tr("yaml file (*.yaml);;All Files(*)"));
+                     tr("Save tuning result"), "",
+                     tr("yaml file (*.yaml);;All Files(*)"));
   std::string save_filePath(fileName.toLatin1());
 
-  if (!save_filePath.empty()) {
+  if (!save_filePath.empty())
+  {
     TunerBody::saveResult(save_filePath);
 
     /* show notification */
@@ -74,11 +75,12 @@ void MainWindow::on_pushButton_save_clicked()
 void MainWindow::on_pushButton_loadSetting_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this,
-                                                  tr("Open setting file"), "",
-                                                  tr("yaml file (*.yaml);;All Files(*)"));
+                     tr("Open setting file"), "",
+                     tr("yaml file (*.yaml);;All Files(*)"));
   std::string open_filePath(fileName.toLatin1());
 
-  if (!open_filePath.empty()) {
+  if (!open_filePath.empty())
+  {
     TunerBody::openSetting(open_filePath);
   }
 }
