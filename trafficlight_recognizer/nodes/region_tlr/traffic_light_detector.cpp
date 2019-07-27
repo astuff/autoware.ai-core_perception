@@ -1,6 +1,6 @@
 #include "trafficlight_recognizer/traffic_light.h"
-#include "RegionTLR.h"
-#include "TrafficLightDetector.h"
+#include "trafficlight_recognizer/region_tlr/region_tlr.h"
+#include "trafficlight_recognizer/region_tlr/traffic_light_detector.h"
 
 #define BLACK CV_RGB(0, 0, 0)
 #define WHITE CV_RGB(255, 255, 255)

@@ -5,7 +5,7 @@
 #include <cmath>
 
 /* Internal includes */
-#include "TrafficLightDetector.h"
+#include "trafficlight_recognizer/region_tlr/traffic_light_detector.h"
 
 /* Functions declarations */
 void setContexts(TrafficLightDetector &detector,

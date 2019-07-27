@@ -105,7 +105,7 @@ add_dependencies(tl_switch
 ### region_tlr ###
 add_executable(region_tlr
         nodes/region_tlr/region_tlr.cpp
-        nodes/region_tlr/TrafficLightDetector.cpp
+        nodes/region_tlr/traffic_light_detector.cpp
         )
 
 target_link_libraries(region_tlr
@@ -120,13 +120,6 @@ add_dependencies(region_tlr
         )
 
 ### feat_proj ###
-include_directories(
-        ${catkin_INCLUDE_DIRS}
-        ${vector_map_INCLUDE_DIRS}
-        ${autoware_msgs_INCLUDE_DIRS}
-        ${Eigen3_INCLUDE_DIRS}
-)
-
 add_executable(feat_proj
         nodes/feat_proj/feat_proj.cpp
         )
@@ -211,17 +204,6 @@ find_package(TinyXML REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-include_directories(
-        include/
-        ${catkin_INCLUDE_DIRS}
-        ${vector_map_INCLUDE_DIRS}
-        ${autoware_msgs_INCLUDE_DIRS}
-        ${TinyXML_INCLUDE_DIRS}
-        nodes/label_maker/
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}
-)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
 file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")
