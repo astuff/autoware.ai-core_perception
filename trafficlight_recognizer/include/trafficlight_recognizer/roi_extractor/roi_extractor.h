@@ -9,7 +9,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 
-#include "Context.h"
 #include "autoware_msgs/Signals.h"
 
 class ROIExtractor {

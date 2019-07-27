@@ -8,7 +8,7 @@
 #include <mxnet/c_predict_api.h>
 #include <opencv2/opencv.hpp>
 
-#include "Context.h"
+#include "trafficlight_recognizer/context.h"
 
 class MxNetTrafficLightRecognizer {
 	enum NetworkResults {Green, Yellow, Red, None};

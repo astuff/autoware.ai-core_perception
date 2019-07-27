@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <ros/ros.h>
-#include "Rate.h"
+#include "trafficlight_recognizer/rate.h"
 #include "libvectormap/vector_map.h"
 #include <tf/tf.h>
 #include <tf/transform_listener.h>

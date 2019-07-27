@@ -1,4 +1,4 @@
-#include "custom_graphics_view.h"
+#include "trafficlight_recognizer/label_maker/custom_graphics_view.h"
 
 #include <iostream>
 #include <QTimeLine>

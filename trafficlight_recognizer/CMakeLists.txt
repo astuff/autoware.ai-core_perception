@@ -84,7 +84,7 @@ roslint_cpp()
 ###########
 ## Build ##
 ###########
-add_library(libcontext lib/Context.cpp)
+add_library(libcontext lib/context.cpp)
 add_dependencies(libcontext
         ${catkin_EXPORTED_TARGETS}
         )
@@ -213,6 +213,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(
+        include/
         ${catkin_INCLUDE_DIRS}
         ${vector_map_INCLUDE_DIRS}
         ${autoware_msgs_INCLUDE_DIRS}
@@ -223,7 +224,7 @@ include_directories(
 )
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
-file(GLOB HEADERS "nodes/label_maker/*.h")
+file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")
 file(GLOB UI_SOURCES "nodes/label_maker/*.ui")
 
 qt5_wrap_ui(UI_HEADERS ${UI_SOURCES})

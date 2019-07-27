@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "label_maker_gui.h"
+#include "trafficlight_recognizer/label_maker/label_maker_gui.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]) {

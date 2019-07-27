@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include "Context.h"
+#include "trafficlight_recognizer/context.h"
 
 #define MY_COLOR_PURPLE	cv::Scalar(255,0,255)
 #define MY_COLOR_RED	cv::Scalar(0,0,255)

@@ -1,4 +1,4 @@
-#include "Context.h"
+#include "trafficlight_recognizer/context.h"
 
 Context::Context(cv::Point aRedCenter, cv::Point aYellowCenter, cv::Point aGreenCenter,
                  int aLampRadius, cv::Point aTopLeft, cv::Point aBotRight)

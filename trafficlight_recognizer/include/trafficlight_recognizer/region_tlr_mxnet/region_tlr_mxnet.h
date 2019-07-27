@@ -13,7 +13,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include "Context.h"
+#include "trafficlight_recognizer/context.h"
 #include "autoware_msgs/Signals.h"
 #include "mxnet_traffic_light_recognizer.h"
 

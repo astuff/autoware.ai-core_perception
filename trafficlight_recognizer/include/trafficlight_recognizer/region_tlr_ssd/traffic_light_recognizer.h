@@ -7,7 +7,7 @@
 #include <caffe/caffe.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "Context.h"
+#include "trafficlight_recognizer/context.h"
 
 class TrafficLightRecognizer {
  public:

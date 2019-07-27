@@ -18,7 +18,7 @@
 #include <autoware_msgs/TrafficLightResultArray.h>
 #include <autoware_msgs/TrafficLightResult.h>
 
-#include "TrafficLight.h"
+#include "trafficlight_recognizer/traffic_light.h"
 #include "RegionTLR.h"
 
 thresholdSet thSet;

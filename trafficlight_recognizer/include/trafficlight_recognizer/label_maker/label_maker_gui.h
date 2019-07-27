@@ -1,7 +1,7 @@
 #ifndef LABEL_MAKER_GUI_H
 #define LABEL_MAKER_GUI_H
 
-#include "file_system_operator.h"
+#include "trafficlight_recognizer/label_maker/file_system_operator.h"
 
 #include <map>
 #include <string>
