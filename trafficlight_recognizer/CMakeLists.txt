@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         libvectormap
         roscpp
+        roslint
         sensor_msgs
         std_msgs
         tf
@@ -76,6 +77,9 @@ catkin_package(
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
+
+set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
+roslint_cpp()
 
 ###########
 ## Build ##
@@ -357,4 +361,8 @@ if (USE_CUDA AND EXISTS "${MXNET_PATH}")
 
 else ()
     message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
+endif ()
+
+if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
 endif ()
