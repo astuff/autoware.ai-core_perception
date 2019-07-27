@@ -308,8 +308,6 @@ if (USE_CUDA AND EXISTS "${MXNET_PATH}")
     add_executable(region_tlr_mxnet
             nodes/region_tlr_mxnet/region_tlr_mxnet.cpp
             nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.cpp
-            nodes/region_tlr_mxnet/region_tlr_mxnet.h
-            nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.h
             )
 
     target_link_libraries(region_tlr_mxnet
@@ -328,7 +326,6 @@ if (USE_CUDA AND EXISTS "${MXNET_PATH}")
             ${MXNET_PATH}/include/
             ${MXNET_PATH}/dmlc-core/include/
             ${CUDA_INCLUDE_DIRS}
-            nodes/region_tlr_mxnet/
             include
             )
 

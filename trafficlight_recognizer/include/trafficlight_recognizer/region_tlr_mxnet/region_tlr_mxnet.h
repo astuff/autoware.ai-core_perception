@@ -7,15 +7,15 @@
 #include <std_msgs/Bool.h>
 
 #include <opencv2/opencv.hpp>
-#include <ros/ros.h>
 
+#include <ros/ros.h>
+#include <autoware_msgs/Signals.h>
+#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <cv_bridge/cv_bridge.h>
 
 #include "trafficlight_recognizer/context.h"
-#include "autoware_msgs/Signals.h"
-#include "mxnet_traffic_light_recognizer.h"
+#include "trafficlight_recognizer/region_tlr_mxnet/mxnet_traffic_light_recognizer.h"
 
 class BufferFile {
 public :

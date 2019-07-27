@@ -6,7 +6,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include "trafficlight_recognizer/context.h"
-#include "region_tlr_mxnet.h"
+#include "trafficlight_recognizer/region_tlr_mxnet/region_tlr_mxnet.h"
 
 
 static bool show_superimpose_result = false;

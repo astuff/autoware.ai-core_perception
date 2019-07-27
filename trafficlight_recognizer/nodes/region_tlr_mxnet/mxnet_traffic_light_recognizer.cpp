@@ -1,4 +1,4 @@
-#include "mxnet_traffic_light_recognizer.h"
+#include "trafficlight_recognizer/region_tlr_mxnet/mxnet_traffic_light_recognizer.h"
 
 MxNetTrafficLightRecognizer::MxNetTrafficLightRecognizer()
 {
