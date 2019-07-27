@@ -260,7 +260,6 @@ if (USE_CUDA AND EXISTS "${SSD_CAFFE_PATH}")
     target_include_directories(region_tlr_ssd PRIVATE
             ${SSD_CAFFE_PATH}/include
             ${CUDA_INCLUDE_DIRS}
-            nodes/region_tlr_ssd/
             )
 
     add_dependencies(region_tlr_ssd
