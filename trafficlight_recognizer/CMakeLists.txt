@@ -365,5 +365,5 @@ else ()
 endif ()
 
 if (CATKIN_ENABLE_TESTING)
-  roslint_add_test()
+#  roslint_add_test()
 endif ()
