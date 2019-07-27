@@ -10,7 +10,6 @@ enum LightState
 	GREEN, YELLOW, RED, UNDEFINED
 };
 
-
 class Context
 {
 public:
@@ -35,8 +34,8 @@ public:
 	int         lampRadius;
 	cv::Point   topLeft;
 	cv::Point   botRight;
-	LightState  lightState;
-	LightState  newCandidateLightState;
+	LightState  lightState = UNDEFINED;
+	LightState  newCandidateLightState = UNDEFINED;
 	int         signalID;
 	int         stateJudgeCount;
 	bool        leftTurnSignal;
