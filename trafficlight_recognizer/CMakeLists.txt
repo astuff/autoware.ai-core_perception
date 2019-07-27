@@ -142,7 +142,6 @@ EXECUTE_PROCESS(
 
 include_directories(
         include
-        nodes/tlr_tuner/
         ${catkin_INCLUDE_DIRS}
         ${vector_map_INCLUDE_DIRS}
         ${autoware_msgs_INCLUDE_DIRS}
@@ -155,9 +154,9 @@ qt5_wrap_ui(tlr_tuner_ui_mainwindow nodes/tlr_tuner/mainwindow.ui)
 add_executable(tlr_tuner
         nodes/tlr_tuner/tlr_tuner.cpp
         nodes/tlr_tuner/mainwindow.cpp
-        nodes/tlr_tuner/mainwindow.h
-        nodes/tlr_tuner/tunerBody.cpp
-        nodes/tlr_tuner/tunerBody.h
+        nodes/tlr_tuner/tuner_body.cpp
+        include/trafficlight_recognizer/tlr_tuner/mainwindow.h
+        include/trafficlight_recognizer/tlr_tuner/tuner_body.h
         ${tlr_tuner_ui_mainwindow}
         )
 
@@ -175,13 +174,6 @@ target_link_libraries(tlr_tuner
 
 
 ### roi_extractor ###
-include_directories(
-        ${catkin_INCLUDE_DIRS}
-        ${vector_map_INCLUDE_DIRS}
-        ${autoware_msgs_INCLUDE_DIRS}
-        include
-)
-
 add_executable(roi_extractor
         nodes/roi_extractor/roi_extractor.cpp
         )

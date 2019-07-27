@@ -1,4 +1,5 @@
-#include "roi_extractor.h"
+#include "trafficlight_recognizer/roi_extractor/roi_extractor.h"
+#include "trafficlight_recognizer/context.h"
 
 #include <sys/stat.h>
 #include <dirent.h>
@@ -6,16 +7,13 @@
 #include <string>
 #include <vector>
 
+#include <opencv2/opencv.hpp>
+
 #include <ros/ros.h>
+#include <autoware_msgs/Signals.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <opencv2/opencv.hpp>
-
-
-#include "trafficlight_recognizer/context.h"
-#include <autoware_msgs/Signals.h>
-
 
 void ROIExtractor::ImageRawCallback(const sensor_msgs::Image &image) {
   // Acquire frame image from ros topic

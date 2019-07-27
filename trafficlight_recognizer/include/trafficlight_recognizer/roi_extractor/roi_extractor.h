@@ -4,12 +4,12 @@
 #include <string>
 
 #include <ros/ros.h>
+#include <autoware_msgs/Signals.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <opencv2/opencv.hpp>
 
-#include "autoware_msgs/Signals.h"
+#include <opencv2/opencv.hpp>
 
 class ROIExtractor {
  public:

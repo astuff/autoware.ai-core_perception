@@ -1,6 +1,6 @@
-#include "tunerBody.h"
-#include "autoware_msgs/TunedResult.h"
+#include "trafficlight_recognizer/tlr_tuner/tuner_body.h"
 
+#include <autoware_msgs/TunedResult.h>
 
 #include <opencv2/core/version.hpp>
 #if (CV_MAJOR_VERSION != 3)

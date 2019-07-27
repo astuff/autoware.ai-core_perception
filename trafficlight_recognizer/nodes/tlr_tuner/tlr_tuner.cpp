@@ -1,6 +1,8 @@
+#include "trafficlight_recognizer/tlr_tuner/mainwindow.h"
+#include "trafficlight_recognizer/tlr_tuner/tuner_body.h"
+
 #include <ros/ros.h>
-#include "mainwindow.h"
-#include "tunerBody.h"
+
 #include <QApplication>
 
 int main(int argc, char *argv[])

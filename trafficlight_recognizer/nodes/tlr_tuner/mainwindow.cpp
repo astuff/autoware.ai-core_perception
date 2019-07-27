@@ -1,6 +1,7 @@
-#include "mainwindow.h"
+#include "trafficlight_recognizer/tlr_tuner/tuner_body.h"
+#include "trafficlight_recognizer/tlr_tuner/mainwindow.h"
 #include "ui_mainwindow.h"
-#include "tunerBody.h"
+
 #include <QtCore/QString>
 #include <QFileDialog>
 #include <QMessageBox>
