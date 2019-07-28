@@ -1,4 +1,5 @@
-#include "region_tlr_ssd.h"
+#include "trafficlight_recognizer/region_tlr_ssd/region_tlr_ssd.h"
+#include "trafficlight_recognizer/context.h"
 
 #include <string>
 
@@ -6,8 +7,6 @@
 #include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-
-#include "trafficlight_recognizer/context.h"
 
 // ========================================
 // Constructor of RegionTLRSSDROSNode class
