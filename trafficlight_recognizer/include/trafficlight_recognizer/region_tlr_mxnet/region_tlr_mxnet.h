@@ -1,10 +1,26 @@
-#ifndef REGION_TLR_MXNET_H
-#define REGION_TLR_MXNET_H
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-#include <string>
-#include <iostream>
+#ifndef TRAFFICLIGHT_RECOGNIZER_REGION_TLR_MXNET_REGION_TLR_MXNET_H
+#define TRAFFICLIGHT_RECOGNIZER_REGION_TLR_MXNET_REGION_TLR_MXNET_H
+
 #include <fstream>
-#include <std_msgs/Bool.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 
@@ -13,6 +29,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Bool.h>
 
 #include "trafficlight_recognizer/context.h"
 #include "trafficlight_recognizer/region_tlr_mxnet/mxnet_traffic_light_recognizer.h"
@@ -82,7 +99,8 @@ public:
 
 private:
   /* Light state transition probably happen in Japanese traffic light */
-  const LightState kStateTransitionMatrix[4][4] = {
+  const LightState kStateTransitionMatrix[4][4] =
+  {
     /* current: */
     /* GREEN   , YELLOW    , RED    , UNDEFINED  */
     /* -------------------------------------------  */
@@ -150,4 +168,4 @@ private:
   const std::string kStringUnknown;
 };
 
-#endif  // REGION_TLR_MXNET_H
+#endif  // TRAFFICLIGHT_RECOGNIZER_REGION_TLR_MXNET_REGION_TLR_MXNET_H

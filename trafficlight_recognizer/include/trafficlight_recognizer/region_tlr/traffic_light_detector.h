@@ -1,5 +1,21 @@
-#ifndef TRAFFIC_LIGHT_DETECTOR_H
-#define TRAFFIC_LIGHT_DETECTOR_H
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef TRAFFICLIGHT_RECOGNIZER_REGION_TLR_TRAFFIC_LIGHT_DETECTOR_H
+#define TRAFFICLIGHT_RECOGNIZER_REGION_TLR_TRAFFIC_LIGHT_DETECTOR_H
 
 #include <vector>
 #include <opencv2/core/core.hpp>
@@ -15,7 +31,8 @@
 #define MY_COLOR_BLUE cv::Scalar(255, 0, 0)
 #define MY_COLOR_WHITE cv::Scalar(255, 255, 255)
 
-const LightState STATE_TRANSITION_MATRIX[4][8] = {
+const LightState STATE_TRANSITION_MATRIX[4][8] =
+{
   /* current GYR: 000, 001, 010, 011, 100, 101, 110, 111 */
   { GREEN, UNDEFINED, YELLOW, YELLOW, GREEN, GREEN, YELLOW, UNDEFINED }, /* pre = GREEN  */
   { YELLOW, RED, YELLOW, RED, UNDEFINED, UNDEFINED, YELLOW, UNDEFINED }, /* pre = YELLOW */
@@ -46,8 +63,8 @@ enum daytime_Hue_threshold
   DAYTIME_GREEN_UPPER = 190,  // 180,
 };
 
-#define DAYTIME_S_SIGNAL_THRESHOLD ((double)0.37)       //((double)0.27)
-#define DAYTIME_V_SIGNAL_THRESHOLD ((double)140 / 255)  //((double)90/255) //((double)110/255)
+#define DAYTIME_S_SIGNAL_THRESHOLD ((double)0.37)       // ((double)0.27)
+#define DAYTIME_V_SIGNAL_THRESHOLD ((double)140 / 255)  // ((double)90/255) //((double)110/255)
 
 #define NOISE_REDUCTION_TIME 1
 
@@ -59,17 +76,17 @@ enum daytime_Hue_threshold
 /* utility functions to convert HSV value range from OpenCV to definition */
 static inline double Actual_Hue(uchar hue_opencv)
 {
-  return ((double)2 * hue_opencv);
-} /* static inline double Actual_Hue() */
+  return (2.0 * static_cast<double>(hue_opencv));
+}  // static inline double Actual_Hue()
 
 static inline double Actual_Sat(uchar sat_opencv)
 {
-  return ((double)sat_opencv / 255);
-} /* static inline double Actual_Sat() */
+  return (static_cast<double>(sat_opencv) / 255.0);
+}  // static inline double Actual_Sat()
 
 static inline double Actual_Val(uchar val_opencv)
 {
-  return ((double)val_opencv / 255);
-} /* static inline double Actual_Val() */
+  return (static_cast<double>(val_opencv) / 255.0);
+}  // static inline double Actual_Val()
 
-#endif
+#endif  // TRAFFICLIGHT_RECOGNIZER_REGION_TLR_TRAFFIC_LIGHT_DETECTOR_H

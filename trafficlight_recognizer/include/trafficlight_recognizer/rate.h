@@ -1,46 +1,55 @@
 /*
- * Rate.h
- *
- *  Created on: Mar 19, 2015
- *      Author: sujiwo
+ * Copyright 2015 sujiwo
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#ifndef RATE_H_
-#define RATE_H_
+#ifndef TRAFFICLIGHT_RECOGNIZER_RATE_H
+#define TRAFFICLIGHT_RECOGNIZER_RATE_H
 
 #include <unistd.h>
 #include <string>
 #include <iostream>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace boost::posix_time;
+namespace pt = boost::posix_time;
 
 class Rate
 {
 public:
-  inline Rate(int hz)
+  inline explicit Rate(int hz)
   {
     assert(hz >= 1);
-    float microsec = 1e6 / (float)hz;
-    sleeptime = microseconds(microsec);
-    lastUpdate = microsec_clock::local_time();
+    float microsec = 1e6 / static_cast<float>(hz);
+    sleeptime = pt::microseconds(microsec);
+    lastUpdate = pt::microsec_clock::local_time();
   }
 
   inline void sleep()
   {
-    ptime curtime = microsec_clock::local_time();
-    time_duration delay = curtime - lastUpdate;
+    pt::ptime curtime = pt::microsec_clock::local_time();
+    pt::time_duration delay = curtime - lastUpdate;
     if (delay < sleeptime)
     {
-      time_duration realSleepTime = sleeptime - delay;
+      pt::time_duration realSleepTime = sleeptime - delay;
       usleep(realSleepTime.total_microseconds());
     }
-    lastUpdate = microsec_clock::local_time();
+    lastUpdate = pt::microsec_clock::local_time();
   }
 
 private:
-  ptime lastUpdate;
-  time_duration sleeptime;
+  pt::ptime lastUpdate;
+  pt::time_duration sleeptime;
 };
 
-#endif /* RATE_H_ */
+#endif  // TRAFFICLIGHT_RECOGNIZER_RATE_H

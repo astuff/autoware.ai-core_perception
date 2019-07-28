@@ -1,5 +1,21 @@
-#ifndef TUNER_BODY_H
-#define TUNER_BODY_H
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef TRAFFICLIGHT_RECOGNIZER_TLR_TUNER_TUNER_BODY_H
+#define TRAFFICLIGHT_RECOGNIZER_TLR_TUNER_TUNER_BODY_H
 
 #include <iostream>
 #include <string>
@@ -20,7 +36,8 @@ typedef struct
 {
   int center;
   int range;
-} value_set;
+}
+value_set;
 
 typedef struct
 {
@@ -28,7 +45,8 @@ typedef struct
   value_set sat;
   value_set val;
   bool isUpdated;
-} thresholds_set;
+}
+thresholds_set;
 
 class TunerBody
 {
@@ -67,4 +85,4 @@ public:
   static void image_raw_callBack(const sensor_msgs::Image& image_msg);
 };
 
-#endif  // TUNER_BODY_H
+#endif  // TRAFFICLIGHT_RECOGNIZER_TLR_TUNER_TUNER_BODY_H
