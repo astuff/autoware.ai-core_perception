@@ -20,6 +20,7 @@
 #include <autoware_msgs/TrafficLight.h>
 
 #include <chrono>
+#include <string>
 #include <thread>
 
 static const bool ADVERTISE_LATCH = true;

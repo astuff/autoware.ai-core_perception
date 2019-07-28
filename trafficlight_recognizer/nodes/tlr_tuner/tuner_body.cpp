@@ -16,6 +16,9 @@
 
 #include "trafficlight_recognizer/tlr_tuner/tuner_body.h"
 
+#include <string>
+#include <vector>
+
 #include <autoware_msgs/TunedResult.h>
 
 #include <opencv2/core/version.hpp>
@@ -51,7 +54,7 @@ static void onMouse(int event, int x, int y, int, void*)
   TunerBody::setClickedPoint(cv::Point(x, y));
 
   return;
-} /* void onMouse() */
+}  // void onMouse()
 
 /*============== Utility function ==============*/
 static void colorTrack(const cv::Mat& hsv_img, const int hue, const int sat, const int val, const int hw, const int sw,
@@ -65,8 +68,7 @@ static void colorTrack(const cv::Mat& hsv_img, const int hue, const int sat, con
   /* remove noise */
   dilate(*dst, *dst, kernel, cv::Point(-1, -1), 2);
   erode(*dst, *dst, kernel, cv::Point(-1, -1), 2);
-
-} /* void colorTrack() */
+}  // void colorTrack()
 
 /*============== Utility function ==============*/
 static int index_max(std::vector<std::vector<cv::Point> > cnt)
@@ -85,8 +87,7 @@ static int index_max(std::vector<std::vector<cv::Point> > cnt)
   }
 
   return maxIdx;
-
-} /* int index_max() */
+}  // int index_max()
 
 TunerBody::TunerBody()
 {
@@ -129,13 +130,12 @@ TunerBody::TunerBody()
   cv::createTrackbar("H", windowName, &H_slider_val, 127, NULL, NULL);
   cv::createTrackbar("S", windowName, &S_slider_val, 127, NULL, NULL);
   cv::createTrackbar("V", windowName, &V_slider_val, 127, NULL, NULL);
-
-} /* TunerBody::TunerBody() */
+}  // TunerBody::TunerBody()
 
 TunerBody::~TunerBody()
 {
   cv::destroyAllWindows();
-} /* TunerBody::~TunerBody() */
+}  // TunerBody::~TunerBody()
 
 void TunerBody::image_raw_callBack(const sensor_msgs::Image& image_msg)
 {
@@ -146,7 +146,7 @@ void TunerBody::image_raw_callBack(const sensor_msgs::Image& image_msg)
     updateImage = false;
     Clicked_point = cv::Point(-1, -1);  // if image is reloaded, reset clicked point to out of image
   }
-} /* TunerBody::image_raw_callBack() */
+}  // TunerBody::image_raw_callBack()
 
 void TunerBody::launch(void)
 {
@@ -195,9 +195,9 @@ void TunerBody::launch(void)
     if (targetPoint != prev_clicked && targetPoint != cv::Point(-1, -1))
     {
       std::cerr << "Selected_set updated" << std::endl;
-      int hue = (int)hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[0];
-      int sat = (int)hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[1];
-      int val = (int)hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[2];
+      int hue = static_cast<int>(hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[0]);
+      int sat = static_cast<int>(hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[1]);
+      int val = static_cast<int>(hsv_img.at<cv::Vec3b>(targetPoint.y, targetPoint.x)[2]);
 
       /* save HSV values into correspond variables */
       Selected_set->hue.center = hue;
@@ -297,8 +297,7 @@ void TunerBody::launch(void)
   }
 
   cv::destroyAllWindows();
-
-} /* void TunerBody::launch() */
+}  // void TunerBody::launch()
 
 void TunerBody::setColor(signal_state state)
 {
@@ -327,13 +326,12 @@ void TunerBody::setColor(signal_state state)
   cv::cvtColor(src_img, hsv_img, cv::COLOR_BGR2HSV);
   colorTrack(hsv_img, Selected_set->hue.center, Selected_set->sat.center, Selected_set->val.center,
              Selected_set->hue.range, Selected_set->sat.range, Selected_set->val.range, &mask);
-
-} /* void TunerBody::setColor() */
+}  // void TunerBody::setColor()
 
 void TunerBody::setClickedPoint(cv::Point pt)
 {
   Clicked_point = pt;
-} /* void TunerBody::setClickedPoint() */
+}  // void TunerBody::setClickedPoint()
 
 void TunerBody::saveResult(std::string fileName)
 {
@@ -460,8 +458,7 @@ void TunerBody::saveResult(std::string fileName)
       cv::write(cvfs, "range", Green_set.val.range);
     }
   }
-
-} /* void TunerBody::saveResult() */
+}  // void TunerBody::saveResult()
 
 void TunerBody::openSetting(std::string fileName)
 {
@@ -549,10 +546,9 @@ void TunerBody::openSetting(std::string fileName)
   cv::cvtColor(src_img, hsv_img, cv::COLOR_BGR2HSV);
   colorTrack(hsv_img, Selected_set->hue.center, Selected_set->sat.center, Selected_set->val.center,
              Selected_set->hue.range, Selected_set->sat.range, Selected_set->val.range, &mask);
-
-} /* void TunerBody::openSetting() */
+}  // void TunerBody::openSetting()
 
 void TunerBody::setUpdateImage(void)
 {
   updateImage = true;
-} /* void TunerBody::setUpdateImage() */
+}  // void TunerBody::setUpdateImage()

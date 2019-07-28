@@ -51,7 +51,7 @@ void ROIExtractor::ROISignalCallback(const autoware_msgs::Signals::ConstPtr& ext
 
   // Aquire signal positions from ros topic
   std::vector<Context> signal_positions;
-  Context::SetContexts(signal_positions, extracted_pos, frame_.rows, frame_.cols);
+  Context::SetContexts(&signal_positions, extracted_pos, frame_.rows, frame_.cols);
 
   if (signal_positions.size() == 0)
   {
@@ -101,7 +101,6 @@ void ROIExtractor::CreateTargetDirectory(std::string base_name)
 
   // Save directory name into class member
   target_directory_ = target_directory_name;
-
 }  // void ROIExtractor::CreateTargetDirectory
 
 int ROIExtractor::CountFileNum(std::string directory_name)

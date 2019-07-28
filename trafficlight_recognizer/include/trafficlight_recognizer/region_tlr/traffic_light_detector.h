@@ -49,7 +49,7 @@ class TrafficLightDetector
 public:
   TrafficLightDetector();
   void brightnessDetect(const cv::Mat& input);
-  void colorDetect(const cv::Mat& input, cv::Mat& output, const cv::Rect coords, int Hmin, int Hmax);
+  void colorDetect(const cv::Mat& input, cv::Mat* output, const cv::Rect coords, int Hmin, int Hmax);
   std::vector<Context> contexts;
 };
 

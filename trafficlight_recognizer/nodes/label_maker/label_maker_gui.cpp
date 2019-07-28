@@ -16,10 +16,11 @@
 
 #include "trafficlight_recognizer/label_maker/label_maker_gui.h"
 #include "trafficlight_recognizer/label_maker/file_system_operator.h"
-#include "ui_label_maker_gui.h"
+#include "ui_label_maker_gui.h"  // NOLINT(build/include)
 
 #include <iostream>
 #include <map>
+#include <string>
 
 #include <QFileDialog>
 #include <QMessageBox>

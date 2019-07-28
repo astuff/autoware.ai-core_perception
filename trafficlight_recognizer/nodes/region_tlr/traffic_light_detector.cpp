@@ -18,6 +18,9 @@
 #include "trafficlight_recognizer/region_tlr/region_tlr.h"
 #include "trafficlight_recognizer/region_tlr/traffic_light_detector.h"
 
+#include <algorithm>
+#include <vector>
+
 #define BLACK CV_RGB(0, 0, 0)
 #define WHITE CV_RGB(255, 255, 255)
 
@@ -29,7 +32,7 @@ struct regionCandidate
   bool isBlacked;
 };
 
-//#define SHOW_DEBUG_INFO
+// #define SHOW_DEBUG_INFO
 extern thresholdSet thSet;  // declared in traffic_light_lkf.cpp
 
 /*
@@ -90,7 +93,6 @@ static void colorExtraction(const cv::Mat& src,  // input HSV image
   /* create mask */
   bitwise_and(channels[0], channels[1], *dst);
   bitwise_and(*dst, channels[2], *dst);
-
 } /* static void colorExtraction() */
 
 static bool checkExtinctionLight(const cv::Mat& src_img, const cv::Point top_left, const cv::Point bot_right,
@@ -155,7 +157,6 @@ static bool checkExtinctionLight(const cv::Mat& src_img, const cv::Point top_lef
   }
 
   return isThere_dark;
-
 } /* static bool checkExtinctionLight() */
 
 static cv::Mat signalDetect_inROI(const cv::Mat& roi, const cv::Mat& src_img, const double estimatedRadius,
@@ -314,7 +315,6 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi, const cv::Mat& src_img, co
   }
 
   return bright_mask;
-
 } /* static void signalDetect_inROI() */
 
 /* constructor for non initialize value */
@@ -419,9 +419,9 @@ void TrafficLightDetector::brightnessDetect(const cv::Mat& input)
 
     if (valid_pixNum > 0)
     {
-      isRed_bright = (((double)red_pixNum / valid_pixNum) > 0.5) ? true : false;
-      isYellow_bright = (((double)yellow_pixNum / valid_pixNum) > 0.5) ? true : false;
-      isGreen_bright = (((double)green_pixNum / valid_pixNum) > 0.5) ? true : false;
+      isRed_bright = ((static_cast<double>(red_pixNum) / valid_pixNum) > 0.5) ? true : false;
+      isYellow_bright = ((static_cast<double>(yellow_pixNum) / valid_pixNum) > 0.5) ? true : false;
+      isGreen_bright = ((static_cast<double>(green_pixNum) / valid_pixNum) > 0.5) ? true : false;
     }
     else
     {
@@ -456,12 +456,12 @@ double getBrightnessRatioInCircle(const cv::Mat& input, const cv::Point center, 
   // printf("Ratio: %f\n", ((double)whitePoints) / (whitePoints + blackPoints));
   // std::cout << "(" << center.x << ", " << center.y << ") "<< "  white:" << whitePoints << " black: " << blackPoints
   // << std::endl;
-  return ((double)whitePoints) / (whitePoints + blackPoints);
+  return static_cast<double>(whitePoints / (whitePoints + blackPoints));
 }
 
 int getCurrentLightsCode(bool display_red, bool display_yellow, bool display_green)
 {
-  return (int)display_red + 2 * ((int)display_yellow) + 4 * ((int)display_green);
+  return static_cast<int>(display_red) + 2 * static_cast<int>(display_yellow) + 4 * static_cast<int>(display_green);
 }
 
 LightState determineState(LightState previousState, int currentLightsCode, int* stateJudgeCount)
@@ -492,7 +492,7 @@ LightState determineState(LightState previousState, int currentLightsCode, int* 
  *  Attempt to recognize by color tracking in HSV. Detects good only green, but need to
  *  play also with S and V parameters range.
  */
-void TrafficLightDetector::colorDetect(const cv::Mat& input, cv::Mat& output, const cv::Rect coords, int Hmin, int Hmax)
+void TrafficLightDetector::colorDetect(const cv::Mat& input, cv::Mat* output, const cv::Rect coords, int Hmin, int Hmax)
 {
   if (input.channels() != 3)
   {
@@ -504,7 +504,7 @@ void TrafficLightDetector::colorDetect(const cv::Mat& input, cv::Mat& output, co
   inRange(hsv, cv::Scalar(Hmin, 0, 0), cv::Scalar(Hmax, 255, 255), thresholded);
 
   cvtColor(thresholded, thresholded, CV_GRAY2RGB);
-  thresholded.copyTo(output);
+  thresholded.copyTo(*output);
 
-  rectangle(output, coords, MY_COLOR_RED);
+  rectangle(*output, coords, MY_COLOR_RED);
 }

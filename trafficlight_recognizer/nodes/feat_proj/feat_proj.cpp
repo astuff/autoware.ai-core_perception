@@ -18,9 +18,12 @@
 #include "libvectormap/vector_map.h"
 #include "libvectormap/Math.h"
 
-#include <iostream>
-#include <signal.h>
+#include <algorithm>
 #include <cstdio>
+#include <iostream>
+#include <map>
+#include <signal.h>
+#include <string>
 
 #include <Eigen/Eigen>
 
@@ -49,7 +52,8 @@ typedef struct
   double thiX;
   double thiY;
   double thiZ;
-} Angle;
+}
+Angle;
 
 static VectorMap vmap;
 // static Angle cameraOrientation; // camera orientation = car's orientation
@@ -184,7 +188,7 @@ static bool isRange(const double lower, const double upper, const double val)
   return false;
 }
 
-void getTransform(Eigen::Quaternionf& ori, Point3& pos)
+void getTransform(Eigen::Quaternionf* ori, Point3* pos)
 {
   static tf::TransformListener listener;
 
@@ -195,16 +199,16 @@ void getTransform(Eigen::Quaternionf& ori, Point3& pos)
 
   tf::Vector3& p = trf.getOrigin();
   tf::Quaternion o = trf.getRotation();
-  pos.x() = p.x();
-  pos.y() = p.y();
-  pos.z() = p.z();
-  ori.w() = o.w();
-  ori.x() = o.x();
-  ori.y() = o.y();
-  ori.z() = o.z();
+  pos->x() = p.x();
+  pos->y() = p.y();
+  pos->z() = p.z();
+  ori->w() = o.w();
+  ori->x() = o.x();
+  ori->y() = o.y();
+  ori->z() = o.z();
 }
 
-Point3 transform(const Point3& psrc, tf::StampedTransform& tfsource)
+Point3 transform(const Point3& psrc, const tf::StampedTransform& tfsource)
 {
   tf::Vector3 pt3(psrc.x(), psrc.y(), psrc.z());
   tf::Vector3 pt3s = tfsource * pt3;
@@ -214,7 +218,7 @@ Point3 transform(const Point3& psrc, tf::StampedTransform& tfsource)
 /*
  * Project a point from world coordinate to image plane
  */
-bool project2(const Point3& pt, int& u, int& v, bool useOpenGLCoord = false)
+bool project2(const Point3& pt, int* u, int* v, bool useOpenGLCoord = false)
 {
   float nearPlane = 1.0;
   float farPlane = 200.0;
@@ -222,17 +226,17 @@ bool project2(const Point3& pt, int& u, int& v, bool useOpenGLCoord = false)
   float _u = _pt.x() * fx / _pt.z() + cx;
   float _v = _pt.y() * fy / _pt.z() + cy;
 
-  u = static_cast<int>(_u);
-  v = static_cast<int>(_v);
-  if (u < 0 || imageWidth < u || v < 0 || imageHeight < v || _pt.z() < nearPlane || farPlane < _pt.z())
+  *u = static_cast<int>(_u);
+  *v = static_cast<int>(_v);
+  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < nearPlane || farPlane < _pt.z())
   {
-    u = -1, v = -1;
+    *u = -1, *v = -1;
     return false;
   }
 
   if (useOpenGLCoord)
   {
-    v = imageHeight - v;
+    *v = imageHeight - *v;
   }
 
   return true;
@@ -266,7 +270,7 @@ double GetSignalAngleInCameraSystem(double hang, double vang)
   return ConvertRadianToDegree(signal_pitch_in_cam);  // holizontal angle of camera is represented by pitch
 }  // double GetSignalAngleInCameraSystem()
 
-void echoSignals2(ros::Publisher& pub, bool useOpenGLCoord = false)
+void echoSignals2(const ros::Publisher& pub, bool useOpenGLCoord = false)
 {
   int countPoint = 0;
   autoware_msgs::Signals signalsInFrame;
@@ -313,15 +317,15 @@ void echoSignals2(ros::Publisher& pub, bool useOpenGLCoord = false)
     Point3 signalcenterx(signalcenter.x(), signalcenter.y(), signalcenter.z() + SignalLampRadius);
 
     int u, v;
-    if (project2(signalcenter, u, v, useOpenGLCoord) == true)
+    if (project2(signalcenter, &u, &v, useOpenGLCoord) == true)
     {
       countPoint++;
       // std::cout << u << ", " << v << ", " << std::endl;
 
       int radius;
       int ux, vx;
-      project2(signalcenterx, ux, vx, useOpenGLCoord);
-      radius = (int)distance(ux, vx, u, v);
+      project2(signalcenterx, &ux, &vx, useOpenGLCoord);
+      radius = static_cast<int>(distance(ux, vx, u, v));
 
       autoware_msgs::ExtractedPosition sign;
       sign.signalId = signal.id;
@@ -436,7 +440,7 @@ int main(int argc, char* argv[])
 
     try
     {
-      getTransform(orientation, position);
+      getTransform(&orientation, &position);
     }
     catch (tf::TransformException& exc)
     {

@@ -18,6 +18,7 @@
 #include "trafficlight_recognizer/region_tlr_mxnet/region_tlr_mxnet.h"
 
 #include <string>
+#include <vector>
 
 #include <autoware_msgs/TrafficLight.h>
 #include <std_msgs/String.h>
@@ -87,7 +88,7 @@ void RegionTLRMxNetROSNode::ROISignalCallback(const autoware_msgs::Signals::Cons
     return;
   }
   // Acquire signal posotion on the image
-  Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols);
+  Context::SetContexts(&contexts_, extracted_pos, frame_.rows, frame_.cols);
 
   // Recognize the color of the traffic light
   for (Context& context : contexts_)
@@ -106,7 +107,7 @@ void RegionTLRMxNetROSNode::ROISignalCallback(const autoware_msgs::Signals::Cons
 
     // The state of the traffic light WON'T be changed
     // unless the new state is found at least change_state_threshold_ times
-    DetermineState(current_state, context);
+    DetermineState(current_state, &context);
   }
 
   // Publish recognition result as some topic format
@@ -167,7 +168,6 @@ void RegionTLRMxNetROSNode::StartSubscribersAndPublishers()
   signal_state_string_publisher = node_handle.advertise<std_msgs::String>("/sound_player", 1);
   marker_publisher = node_handle.advertise<visualization_msgs::MarkerArray>("tlr_result", 1, kAdvertiseInLatch_);
   superimpose_image_publisher = node_handle.advertise<sensor_msgs::Image>("tlr_superimpose_image", 1);
-
 }  // RegionTLRMxNetROSNode::StartSubscribersAndPublishers()
 
 /*!
@@ -177,30 +177,29 @@ void RegionTLRMxNetROSNode::StartSubscribersAndPublishers()
  * @param current_state the current state of the traffic light as reported by the classifier.
  * @param in_out_signal_context the object containing the data of the current Traffic Light instance.
  */
-void RegionTLRMxNetROSNode::DetermineState(LightState in_current_state, Context& in_out_signal_context)
+void RegionTLRMxNetROSNode::DetermineState(LightState in_current_state, Context* in_out_signal_context)
 {
   // if reported state by classifier is different than the previously stored
-  if (in_current_state != in_out_signal_context.lightState)
+  if (in_current_state != in_out_signal_context->lightState)
   {
     // and also different from the previous difference
-    if (in_current_state != in_out_signal_context.newCandidateLightState)
+    if (in_current_state != in_out_signal_context->newCandidateLightState)
     {
       // set classifier result as a candidate
-      in_out_signal_context.newCandidateLightState = in_current_state;
-      in_out_signal_context.stateJudgeCount = 0;
+      in_out_signal_context->newCandidateLightState = in_current_state;
+      in_out_signal_context->stateJudgeCount = 0;
     }
     else
     {
       // if classifier returned the same result previously increase its confidence
-      in_out_signal_context.stateJudgeCount++;
+      in_out_signal_context->stateJudgeCount++;
     }
   }
   // if new candidate has been found enough times, change state to the new candidate
-  if (in_out_signal_context.stateJudgeCount >= change_state_threshold_)
+  if (in_out_signal_context->stateJudgeCount >= change_state_threshold_)
   {
-    in_out_signal_context.lightState = in_current_state;
+    in_out_signal_context->lightState = in_current_state;
   }
-
 }  // LightState RegionTLRMxNetROSNode::DetermineState()
 
 void RegionTLRMxNetROSNode::PublishTrafficLight(std::vector<Context> contexts)
@@ -409,7 +408,6 @@ void RegionTLRMxNetROSNode::PublishMarkerArray(std::vector<Context> contexts)
     // Publish
     marker_publisher.publish(signal_set);
   }
-
 }  // void RegionTLRMxNetROSNode::PublishMarkerArray()
 
 void RegionTLRMxNetROSNode::PublishImage(std::vector<Context> contexts)
@@ -473,7 +471,6 @@ void RegionTLRMxNetROSNode::PublishImage(std::vector<Context> contexts)
   converter.encoding = sensor_msgs::image_encodings::BGR8;
   converter.image = result_image;
   superimpose_image_publisher.publish(converter.toImageMsg());
-
 }  // void RegionTLRMxNetROSNode::PublishImage()
 
 void RegionTLRMxNetROSNode::SuperimposeCb(const std_msgs::Bool::ConstPtr& config_msg)
@@ -494,7 +491,6 @@ void RegionTLRMxNetROSNode::SuperimposeCb(const std_msgs::Bool::ConstPtr& config
       cv::waitKey(1);
     }
   }
-
 }  // void RegionTLRMxNetROSNode::SuperimposeCb()
 
 int main(int argc, char* argv[])

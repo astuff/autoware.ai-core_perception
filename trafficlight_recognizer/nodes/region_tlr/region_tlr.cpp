@@ -17,10 +17,11 @@
 #include "trafficlight_recognizer/traffic_light.h"
 #include "trafficlight_recognizer/region_tlr/region_tlr.h"
 
-#include <vector>
 #include <float.h>
 #include <math.h>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <ros/ros.h>
 #include <autoware_msgs/Signals.h>
@@ -197,7 +198,6 @@ static void image_raw_cb(const sensor_msgs::Image& image_source)
       cv::waitKey(5);
     }
   }
-
 } /* static void image_raw_cb() */
 
 static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr& extractedPos)
@@ -206,7 +206,7 @@ static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr& extractedPos
     return;
 
   /* Set subscribed signal position into detector */
-  Context::SetContexts(detector.contexts, extractedPos, frame.rows, frame.cols);
+  Context::SetContexts(&(detector.contexts), extractedPos, frame.rows, frame.cols);
 
   detector.brightnessDetect(frame);
 
@@ -352,15 +352,15 @@ static void extractedPos_cb(const autoware_msgs::Signals::ConstPtr& extractedPos
     mk_green.pose.orientation.w = 0.0;
 
     /* Set the scale of the marker -- We assume lamp radius as 30cm */
-    mk_red.scale.x = (double)0.3;
-    mk_red.scale.y = (double)0.3;
-    mk_red.scale.z = (double)0.3;
-    mk_yellow.scale.x = (double)0.3;
-    mk_yellow.scale.y = (double)0.3;
-    mk_yellow.scale.z = (double)0.3;
-    mk_green.scale.x = (double)0.3;
-    mk_green.scale.y = (double)0.3;
-    mk_green.scale.z = (double)0.3;
+    mk_red.scale.x = static_cast<double>(0.3);
+    mk_red.scale.y = static_cast<double>(0.3);
+    mk_red.scale.z = static_cast<double>(0.3);
+    mk_yellow.scale.x = static_cast<double>(0.3);
+    mk_yellow.scale.y = static_cast<double>(0.3);
+    mk_yellow.scale.z = static_cast<double>(0.3);
+    mk_green.scale.x = static_cast<double>(0.3);
+    mk_green.scale.y = static_cast<double>(0.3);
+    mk_green.scale.z = static_cast<double>(0.3);
 
     /* Set the color */
     switch (ctx.lightState)
@@ -424,7 +424,6 @@ static void tunedResult_cb(const autoware_msgs::TunedResult& msg)
   thSet.Green.Sat.lower = cvtInt2Double_sat(msg.Green.Sat.center, -msg.Green.Sat.range);
   thSet.Green.Val.upper = cvtInt2Double_val(msg.Green.Val.center, msg.Green.Val.range);
   thSet.Green.Val.lower = cvtInt2Double_val(msg.Green.Val.center, -msg.Green.Val.range);
-
 } /* static void tunedResult_cb() */
 
 static void superimpose_cb(const std_msgs::Bool::ConstPtr& config_msg)
@@ -445,34 +444,33 @@ static void superimpose_cb(const std_msgs::Bool::ConstPtr& config_msg)
       cv::waitKey(1);
     }
   }
-
 } /* static void superimpose_cb() */
 
 int main(int argc, char* argv[])
 {
-  //	printf("***** Traffic lights app *****\n");
+  // printf("***** Traffic lights app *****\n");
 #ifdef SHOW_DEBUG_INFO
   cv::namedWindow("tmpImage", cv::WINDOW_NORMAL);
   cv::namedWindow("bright_mask", cv::WINDOW_NORMAL);
   cv::startWindowThread();
 #endif
 
-  thSet.Red.Hue.upper = (double)DAYTIME_RED_UPPER;
-  thSet.Red.Hue.lower = (double)DAYTIME_RED_LOWER;
+  thSet.Red.Hue.upper = static_cast<double>(DAYTIME_RED_UPPER);
+  thSet.Red.Hue.lower = static_cast<double>(DAYTIME_RED_LOWER);
   thSet.Red.Sat.upper = 1.0f;
   thSet.Red.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Red.Val.upper = 1.0f;
   thSet.Red.Val.lower = DAYTIME_V_SIGNAL_THRESHOLD;
 
-  thSet.Yellow.Hue.upper = (double)DAYTIME_YELLOW_UPPER;
-  thSet.Yellow.Hue.lower = (double)DAYTIME_YELLOW_LOWER;
+  thSet.Yellow.Hue.upper = static_cast<double>(DAYTIME_YELLOW_UPPER);
+  thSet.Yellow.Hue.lower = static_cast<double>(DAYTIME_YELLOW_LOWER);
   thSet.Yellow.Sat.upper = 1.0f;
   thSet.Yellow.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Yellow.Val.upper = 1.0f;
   thSet.Yellow.Val.lower = DAYTIME_V_SIGNAL_THRESHOLD;
 
-  thSet.Green.Hue.upper = (double)DAYTIME_GREEN_UPPER;
-  thSet.Green.Hue.lower = (double)DAYTIME_GREEN_LOWER;
+  thSet.Green.Hue.upper = static_cast<double>(DAYTIME_GREEN_UPPER);
+  thSet.Green.Hue.lower = static_cast<double>(DAYTIME_GREEN_LOWER);
   thSet.Green.Sat.upper = 1.0f;
   thSet.Green.Sat.lower = DAYTIME_S_SIGNAL_THRESHOLD;
   thSet.Green.Val.upper = 1.0f;

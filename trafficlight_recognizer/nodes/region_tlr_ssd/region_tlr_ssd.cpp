@@ -18,6 +18,7 @@
 #include "trafficlight_recognizer/context.h"
 
 #include <string>
+#include <vector>
 
 #include <autoware_msgs/TrafficLight.h>
 #include <std_msgs/String.h>
@@ -93,7 +94,7 @@ void RegionTLRSSDROSNode::ROISignalCallback(const autoware_msgs::Signals::ConstP
   // std::cout << "rois: " << extracted_pos->Signals.size() << std::endl;
 
   // Acquire signal posotion on the image
-  Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols);
+  Context::SetContexts(&contexts_, extracted_pos, frame_.rows, frame_.cols);
 
   // Recognize the color of the traffic light
   for (Context& context : contexts_)
@@ -176,7 +177,6 @@ void RegionTLRSSDROSNode::StartSubscribersAndPublishers()
   signal_state_string_publisher = node_handle.advertise<std_msgs::String>("/sound_player", 1);
   marker_publisher = node_handle.advertise<visualization_msgs::MarkerArray>("tlr_result", 1, kAdvertiseInLatch_);
   superimpose_image_publisher = node_handle.advertise<sensor_msgs::Image>("tlr_superimpose_image", 1);
-
 }  // RegionTLRSSDROSNode::StartSubscribersAndPublishers()
 
 // ===============================================================================
@@ -202,7 +202,6 @@ LightState RegionTLRSSDROSNode::DetermineState(LightState previous_state, LightS
     }
     return previous_state;
   }
-
 }  // LightState RegionTLRSSDROSNode::DetermineState()
 
 // =================================================================
@@ -420,7 +419,6 @@ void RegionTLRSSDROSNode::PublishMarkerArray(std::vector<Context> contexts)
     // Publish
     marker_publisher.publish(signal_set);
   }
-
 }  // void RegionTLRSSDROSNode::PublishMarkerArray()
 
 // ================================================================
@@ -487,7 +485,6 @@ void RegionTLRSSDROSNode::PublishImage(std::vector<Context> contexts)
   converter.encoding = sensor_msgs::image_encodings::BGR8;
   converter.image = result_image;
   superimpose_image_publisher.publish(converter.toImageMsg());
-
 }  // void RegionTLRSSDROSNode::PublishImage()
 
 // ========================

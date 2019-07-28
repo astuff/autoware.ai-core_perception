@@ -16,6 +16,8 @@
 
 #include "trafficlight_recognizer/region_tlr_mxnet/mxnet_traffic_light_recognizer.h"
 
+#include <vector>
+
 MxNetTrafficLightRecognizer::MxNetTrafficLightRecognizer()
 {
 }
@@ -42,8 +44,12 @@ void MxNetTrafficLightRecognizer::Init(const char* in_network_definition_buffer,
   num_channels_ = 3;
 
   const mx_uint input_shape_indptr[2] = { 0, 4 };
-  const mx_uint input_shape_data[4] = { 1, static_cast<mx_uint>(num_channels_), static_cast<mx_uint>(height_),
-                                        static_cast<mx_uint>(width_) };
+  const mx_uint input_shape_data[4] =
+  {
+    1, static_cast<mx_uint>(num_channels_),
+    static_cast<mx_uint>(height_),
+    static_cast<mx_uint>(width_)
+  };
   prediction_handle_ = 0;
 
   MXPredCreate(in_network_definition_buffer, in_pretrained_model_buffer, in_pretrained_model_length, dev_type, dev_id,

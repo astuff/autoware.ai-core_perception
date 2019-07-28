@@ -16,6 +16,9 @@
 
 #include "trafficlight_recognizer/context.h"
 
+#include <algorithm>
+#include <vector>
+
 Context::Context(cv::Point aRedCenter, cv::Point aYellowCenter, cv::Point aGreenCenter, int aLampRadius,
                  cv::Point aTopLeft, cv::Point aBotRight)
 {
@@ -41,7 +44,7 @@ bool Context::CompareContext(const Context in_context_a, const Context in_contex
   return in_context_a.lampRadius >= in_context_b.lampRadius;
 } /* static bool compareContext() */
 
-void Context::SetContexts(std::vector<Context>& out_signal_contexts,
+void Context::SetContexts(std::vector<Context>* out_signal_contexts,
                           const autoware_msgs::Signals::ConstPtr& in_lamp_signals_positions, const int in_image_height,
                           const int in_image_width)
 {
@@ -157,16 +160,16 @@ void Context::SetContexts(std::vector<Context>& out_signal_contexts,
     /* search whether this signal has already belonged in detector.out_signal_contexts */
     bool isInserted = false;
     std::vector<int> eraseCandidate;
-    for (unsigned int i = 0; i < out_signal_contexts.size(); i++)
+    for (unsigned int i = 0; i < out_signal_contexts->size(); i++)
     {
-      if (current_signal_context.signalID == out_signal_contexts.at(i).signalID &&
+      if (current_signal_context.signalID == out_signal_contexts->at(i).signalID &&
           current_signal_context.lampRadius != INT_MAX)
       {
         /* update to new information except to lightState */
         final_signal_contexts.push_back(current_signal_context);
-        final_signal_contexts.back().lightState = out_signal_contexts.at(i).lightState;
-        final_signal_contexts.back().stateJudgeCount = out_signal_contexts.at(i).stateJudgeCount;
-        final_signal_contexts.back().newCandidateLightState = out_signal_contexts.at(i).newCandidateLightState;
+        final_signal_contexts.back().lightState = out_signal_contexts->at(i).lightState;
+        final_signal_contexts.back().stateJudgeCount = out_signal_contexts->at(i).stateJudgeCount;
+        final_signal_contexts.back().newCandidateLightState = out_signal_contexts->at(i).newCandidateLightState;
         isInserted = true;
         break;
       }
@@ -177,18 +180,16 @@ void Context::SetContexts(std::vector<Context>& out_signal_contexts,
       final_signal_contexts.push_back(current_signal_context);  // this current_signal_context is new in
                                                                 // detector.out_signal_contexts
     }
-
   }  // end for check each lane
 
   /* sort by lampRadius */
   std::sort(final_signal_contexts.begin(), final_signal_contexts.end(), CompareContext);
 
   /* reset detector.out_signal_contexts */
-  out_signal_contexts.clear();
-  out_signal_contexts.resize(final_signal_contexts.size());
+  out_signal_contexts->clear();
+  out_signal_contexts->resize(final_signal_contexts.size());
   for (unsigned int i = 0; i < final_signal_contexts.size(); i++)
   {
-    out_signal_contexts.at(i) = final_signal_contexts.at(i);
+    out_signal_contexts->at(i) = final_signal_contexts.at(i);
   }
-
 } /* std::vector<Context> Context::SetContexts() */

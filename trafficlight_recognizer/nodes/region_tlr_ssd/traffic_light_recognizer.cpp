@@ -16,6 +16,9 @@
 
 #include "trafficlight_recognizer/region_tlr_ssd/traffic_light_recognizer.h"
 
+#include <string>
+#include <vector>
+
 // ===========================================
 // Constructor of TrafficLightRecognizer class
 // ===========================================
@@ -63,7 +66,6 @@ void TrafficLightRecognizer::Init(const std::string& network_definition_file_nam
   input_geometry_ = cv::Size(input_layer->width(), input_layer->height());
 
   // SetMean(kPixelMean_);
-
 }  // void TrafficLightRecognizer::Init()
 
 // ================================================
@@ -195,5 +197,4 @@ void TrafficLightRecognizer::Preprocess(const cv::Mat& image, std::vector<cv::Ma
   // objects in input_channels.
   cv::split(sample_normalized, *input_channells);
   CHECK(reinterpret_cast<float*>(input_channells->at(0).data) == network_->input_blobs()[0]->cpu_data());
-
 }  // void TrafficLightRecognizer::Preprocess()

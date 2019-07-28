@@ -16,7 +16,9 @@
 
 #include "trafficlight_recognizer/tlr_tuner/tuner_body.h"
 #include "trafficlight_recognizer/tlr_tuner/mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_mainwindow.h"  // NOLINT(build/include)
+
+#include <string>
 
 #include <QtCore/QString>
 #include <QFileDialog>

@@ -20,7 +20,9 @@
 #include <dirent.h>
 
 #include <fstream>
+#include <map>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <tinyxml.h>
@@ -50,7 +52,6 @@ std::map<int, std::string> FileSystemOperator::GetImageList(const std::string di
     std::string absolute_path = directory_path + std::string(entry->d_name);
     if (stat(absolute_path.c_str(), &status) == 0 && S_ISREG(status.st_mode))
     {  // This entry is surely nomal file
-
       // Get file ID by erasing file extension
       int file_id = GetFileIDFromFilePath(entry->d_name);
 
@@ -145,8 +146,11 @@ void FileSystemOperator::WriteStateToFile(std::string folder_name, std::string f
                                           int x_end, int y_end)
 {
   int image_id = GetFileIDFromFilePath(file_name);
-  LabelData label_data{ folder_name, file_name, state,   image_height, image_width,
-                        image_depth, x_start,   y_start, x_end,        y_end };
+  LabelData label_data =
+  {
+    folder_name, file_name, state, image_height, image_width,
+    image_depth, x_start, y_start, x_end, y_end
+  };
 
   // Insert specified data into data list (if this ID's data already exist, it will be overwritten)
   label_data_list_[image_id] = label_data;

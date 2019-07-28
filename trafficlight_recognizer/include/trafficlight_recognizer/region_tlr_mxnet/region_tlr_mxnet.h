@@ -114,7 +114,7 @@ private:
 
   void StartSubscribersAndPublishers();
 
-  void DetermineState(LightState in_current_state, Context& in_out_signal_context);
+  void DetermineState(LightState in_current_state, Context* in_out_signal_context);
 
   void PublishTrafficLight(std::vector<Context> contexts);
 
