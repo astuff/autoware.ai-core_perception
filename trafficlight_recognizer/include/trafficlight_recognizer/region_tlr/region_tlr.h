@@ -8,30 +8,33 @@
 #include "trafficlight_recognizer/region_tlr/traffic_light_detector.h"
 
 /* Functions declarations */
-void setContexts(TrafficLightDetector &detector,
-                 const autoware_msgs::Signals::ConstPtr &extractedPos);
+void setContexts(TrafficLightDetector& detector, const autoware_msgs::Signals::ConstPtr& extractedPos);
 
 #define MINIMAM_RADIUS 3
 #define ROI_MARGINE 25
 
-static inline bool IsNearlyZero(double x) {
+static inline bool IsNearlyZero(double x)
+{
   double abs_x = fabs(x);
   int scale = 100;
   return (abs_x < DBL_MIN * scale);
 }
 
-struct valueSet {
+struct valueSet
+{
   double upper;
   double lower;
 };
 
-struct hsvSet {
+struct hsvSet
+{
   valueSet Hue;
   valueSet Sat;
   valueSet Val;
 };
 
-struct thresholdSet {
+struct thresholdSet
+{
   hsvSet Red;
   hsvSet Yellow;
   hsvSet Green;

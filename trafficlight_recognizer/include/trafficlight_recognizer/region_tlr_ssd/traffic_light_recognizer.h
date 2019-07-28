@@ -9,18 +9,17 @@
 
 #include "trafficlight_recognizer/context.h"
 
-class TrafficLightRecognizer {
- public:
+class TrafficLightRecognizer
+{
+public:
   TrafficLightRecognizer();
   ~TrafficLightRecognizer();
-  void Init(const std::string& network_definition_file_name,
-            const std::string& pretrained_model_file_name,
-            const bool use_gpu,
-            const unsigned int gpu_id);
+  void Init(const std::string& network_definition_file_name, const std::string& pretrained_model_file_name,
+            const bool use_gpu, const unsigned int gpu_id);
 
   LightState RecognizeLightState(const cv::Mat& image);
 
- private:
+private:
   void WrapInputLayer(std::vector<cv::Mat>* input_channels);
   void Preprocess(const cv::Mat& image, std::vector<cv::Mat>* input_channels);
 

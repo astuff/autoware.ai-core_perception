@@ -9,13 +9,12 @@
 #include <QMouseEvent>
 #include <QGraphicsRectItem>
 
-
 class CustomGraphicsView : public QGraphicsView
 {
   Q_OBJECT
 
 public:
-  CustomGraphicsView(QWidget *parent = 0);
+  CustomGraphicsView(QWidget* parent = 0);
   ~CustomGraphicsView();
 
   // The function to set pixel map
@@ -40,7 +39,7 @@ private slots:
 protected:
   // Custom wheel event slot so that displayed image can be zoomed by mouse operation
   // Ref: https://wiki.qt.io/SmoothZoomInQGraphicsView
-  virtual void wheelEvent(QWheelEvent *event);
+  virtual void wheelEvent(QWheelEvent* event);
 
   // Custom mouse event slot in order to get specified position
   virtual void mousePressEvent(QMouseEvent* mouse_event);
@@ -69,4 +68,4 @@ private:
   bool dragging_;
 };
 
-#endif // CUSTOMQLABEL_H
+#endif  // CUSTOMQLABEL_H

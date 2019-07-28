@@ -11,8 +11,9 @@
 #include <QLabel>
 #include <QAbstractButton>
 
-namespace Ui {
-  class LabelMakerGui;
+namespace Ui
+{
+class LabelMakerGui;
 }
 
 class LabelMakerGui : public QMainWindow
@@ -20,7 +21,7 @@ class LabelMakerGui : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit LabelMakerGui(QWidget *parent = 0);
+  explicit LabelMakerGui(QWidget* parent = 0);
   ~LabelMakerGui();
 
 private slots:
@@ -36,6 +37,7 @@ private slots:
 
   // The behavior of "Reset Selection" button
   void ResetSelection();
+
 private:
   // The utility function to get directory path
   QString GetTargetDirectoryPath();
@@ -47,7 +49,7 @@ private:
   bool SaveCurrentState();
 
   // The GUI handelr
-  Ui::LabelMakerGui *ui_;
+  Ui::LabelMakerGui* ui_;
 
   // Path to the target dataset directory
   QString dataset_path_;
@@ -59,4 +61,4 @@ private:
   FileSystemOperator file_system_operator_;
 };
 
-#endif // LABEL_MAKER_GUI_H
+#endif  // LABEL_MAKER_GUI_H

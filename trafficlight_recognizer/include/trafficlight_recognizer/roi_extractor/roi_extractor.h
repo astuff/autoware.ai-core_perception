@@ -11,32 +11,32 @@
 
 #include <opencv2/opencv.hpp>
 
-class ROIExtractor {
- public:
-  explicit ROIExtractor(int minimum_height, double similarity_threshold):
-    k_minimum_height_(minimum_height),
-    k_similarity_threshold_(similarity_threshold),
-    previous_saved_frame_(cv::Mat())
-  {};
+class ROIExtractor
+{
+public:
+  explicit ROIExtractor(int minimum_height, double similarity_threshold)
+    : k_minimum_height_(minimum_height)
+    , k_similarity_threshold_(similarity_threshold)
+    , previous_saved_frame_(cv::Mat()){};
 
   ~ROIExtractor(){};
 
   // Callback functions to obtain images and signal position
-  void ImageRawCallback(const sensor_msgs::Image &image);
-  void ROISignalCallback(const autoware_msgs::Signals::ConstPtr &extracted_pos);
-  
+  void ImageRawCallback(const sensor_msgs::Image& image);
+  void ROISignalCallback(const autoware_msgs::Signals::ConstPtr& extracted_pos);
+
   // Utility function to create directory which roi images will be saved
   void CreateTargetDirectory(std::string base_name);
 
- private:
+private:
   // Utility function to count the number of files contained in the specified directory
   int CountFileNum(std::string directory_name);
 
   // Utility function to create directory tree
-  void MakeDirectoryTree(const std::string &target, const std::string &base, const mode_t &mode);
+  void MakeDirectoryTree(const std::string& target, const std::string& base, const mode_t& mode);
 
   // The function to calculate similarity of two image
-  double CalculateSimilarity(const cv::Mat &image1, const cv::Mat &image2);
+  double CalculateSimilarity(const cv::Mat& image1, const cv::Mat& image2);
 
   // Directory path that extracted ROI images will be saved
   std::string target_directory_;
@@ -61,4 +61,4 @@ class ROIExtractor {
   cv::Mat previous_saved_frame_;
 };
 
-#endif // ROI_EXTRACTOR_H
+#endif  // ROI_EXTRACTOR_H
