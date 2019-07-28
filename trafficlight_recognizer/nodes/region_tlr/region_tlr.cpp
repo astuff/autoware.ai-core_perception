@@ -1,25 +1,42 @@
+/*
+ * Copyright 2019 Autoware Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "trafficlight_recognizer/traffic_light.h"
+#include "trafficlight_recognizer/region_tlr/region_tlr.h"
+
 #include <vector>
 #include <float.h>
 #include <math.h>
 #include <sstream>
+
 #include <ros/ros.h>
+#include <autoware_msgs/Signals.h>
+#include <autoware_msgs/TrafficLight.h>
+#include <autoware_msgs/TrafficLightResult.h>
+#include <autoware_msgs/TrafficLightResultArray.h>
+#include <autoware_msgs/TunedResult.h>
 #include <cv_bridge/cv_bridge.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <autoware_msgs/TrafficLight.h>
-#include <autoware_msgs/Signals.h>
-#include <autoware_msgs/TunedResult.h>
-#include <autoware_msgs/TrafficLightResultArray.h>
-#include <autoware_msgs/TrafficLightResult.h>
-
-#include "trafficlight_recognizer/traffic_light.h"
-#include "trafficlight_recognizer/region_tlr/region_tlr.h"
 
 thresholdSet thSet;
 
