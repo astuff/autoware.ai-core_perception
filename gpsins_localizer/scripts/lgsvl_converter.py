@@ -66,6 +66,6 @@ def converter():
 if __name__ == '__main__':
 
     # Initialize the node and name it.
-    rospy.init_node('lgsvl_converter').
+    rospy.init_node('lgsvl_converter')
 
     converter()
