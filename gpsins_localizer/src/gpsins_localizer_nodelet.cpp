@@ -386,7 +386,4 @@ tf2::Quaternion GpsInsLocalizerNl::convertAzimuthToENU(double roll, double pitch
 
 }  // namespace gpsins_localizer
 
-PLUGINLIB_DECLARE_CLASS(gpsins_localizer,
-                        GpsInsLocalizerNl,
-                        gpsins_localizer::GpsInsLocalizerNl,
-                        nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(gpsins_localizer::GpsInsLocalizerNl, nodelet::Nodelet);
