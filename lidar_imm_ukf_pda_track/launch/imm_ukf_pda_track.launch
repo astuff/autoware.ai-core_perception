@@ -10,7 +10,7 @@
   <arg name="detection_probability" default="0.9" />
   <arg name="life_time_thres" default="8" />
   <arg name="static_velocity_thres" default="0.5" />
-  <arg name="static_velocity_history_thres" default="3" />
+  <arg name="static_num_history_thres" default="3" />
   <arg name="prevent_explosion_thres" default="1000" />
   <arg name="merge_distance_threshold" default="0.5"/>
   <arg name="use_sukf" default="false" />
@@ -28,7 +28,7 @@
     <param name="detection_probability"   value="$(arg detection_probability)" />
     <param name="life_time_thres"         value="$(arg life_time_thres)" />
     <param name="static_velocity_thres"   value="$(arg static_velocity_thres)" />
-    <param name="static_velocity_history_thres"   value="$(arg static_velocity_history_thres)" />
+    <param name="static_num_history_thres"   value="$(arg static_num_history_thres)" />
     <param name="prevent_explosion_thres" value="$(arg prevent_explosion_thres)" />
     <param name="lane_direction_chi_thres" value="$(arg lane_direction_chi_thres)" />
     <param name="nearest_lane_distance_thres" value="$(arg nearest_lane_distance_thres)" />
