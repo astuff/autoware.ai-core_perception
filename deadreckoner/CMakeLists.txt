@@ -4,17 +4,17 @@ project(deadreckoner)
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  nav_msgs
   roscpp
   std_msgs
-  nav_msgs
-  geometry_msgs
 )
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES deadreckoner
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+  CATKIN_DEPENDS
+    geometry_msgs
+    nav_msgs
+    std_msgs
 )
 
 include_directories(
