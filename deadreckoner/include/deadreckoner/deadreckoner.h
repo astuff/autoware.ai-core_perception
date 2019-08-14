@@ -39,7 +39,6 @@ class DeadRecokner
 {
 public:
   DeadRecokner();
-  ~DeadRecokner();
 private:
   ros::NodeHandle nh_, private_nh_;
   ros::Subscriber twist_sub_;

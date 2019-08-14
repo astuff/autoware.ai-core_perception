@@ -36,10 +36,6 @@ DeadRecokner::DeadRecokner() : nh_(), private_nh_("~")
   odom_pub_ = nh_.advertise<nav_msgs::Odometry>("current_odom", 10);
 }
 
-DeadRecokner::~DeadRecokner()
-{
-}
-
 void DeadRecokner::callbackFromCurrentTwist(const geometry_msgs::TwistStampedConstPtr& msg)
 {
   // TODO(jwhitleyastuff): calculate odom.pose.pose by accumulating
