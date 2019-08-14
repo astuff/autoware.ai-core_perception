@@ -28,7 +28,7 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "deadreckoner.h"
+#include "deadreckoner/deadreckoner.h"
 
 DeadRecokner::DeadRecokner() : nh_(), private_nh_("~")
 {
@@ -42,7 +42,7 @@ DeadRecokner::~DeadRecokner()
 
 void DeadRecokner::callbackFromCurrentTwist(const geometry_msgs::TwistStampedConstPtr& msg)
 {
-  // TODO: calurate odom.pose.pose by accumulating
+  // TODO: calculate odom.pose.pose by accumulating
   nav_msgs::Odometry odom;
   odom.header = msg->header;
   odom.twist.twist = msg->twist;

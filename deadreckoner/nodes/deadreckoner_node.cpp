@@ -30,7 +30,7 @@
 
 #include <ros/ros.h>
 
-#include "deadreckoner.h"
+#include "deadreckoner/deadreckoner.h"
 
 int main(int argc, char** argv)
 {

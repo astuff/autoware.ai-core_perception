@@ -1,6 +1,5 @@
-<!-- -->
+<?xml version="1.0" ?>
 <launch>
-
   <arg name="current_twist" default="/vehicle/twist" />
   <arg name="current_odom" default="/vehicle/odom" />
 
@@ -8,5 +7,4 @@
     <remap from="current_twist" to="$(arg current_twist)" />
     <remap from="current_odom" to="$(arg current_odom)" />
   </node>
-
 </launch>
