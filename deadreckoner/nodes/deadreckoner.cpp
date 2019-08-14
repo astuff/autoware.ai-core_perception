@@ -42,7 +42,7 @@ DeadRecokner::~DeadRecokner()
 
 void DeadRecokner::callbackFromCurrentTwist(const geometry_msgs::TwistStampedConstPtr& msg)
 {
-  // TODO: calculate odom.pose.pose by accumulating
+  // TODO(jwhitleyastuff): calculate odom.pose.pose by accumulating
   nav_msgs::Odometry odom;
   odom.header = msg->header;
   odom.twist.twist = msg->twist;

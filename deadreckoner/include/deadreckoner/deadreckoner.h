@@ -28,8 +28,8 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef DEADRECKONER_H
-#define DEADRECKONER_H
+#ifndef DEADRECKONER_DEADRECKONER_H
+#define DEADRECKONER_DEADRECKONER_H
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
@@ -44,7 +44,8 @@ private:
   ros::NodeHandle nh_, private_nh_;
   ros::Subscriber twist_sub_;
   ros::Publisher odom_pub_;
-  
+
   void callbackFromCurrentTwist(const geometry_msgs::TwistStampedConstPtr& msg);
 };
-#endif  // DEADRECKONER_H
+
+#endif  // DEADRECKONER_DEADRECKONER_H

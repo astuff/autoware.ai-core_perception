@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   roscpp
+  roslint
   std_msgs
 )
 
@@ -21,6 +22,8 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+roslint_cpp()
 
 add_executable(deadreckoner
   nodes/deadreckoner_node.cpp
@@ -41,3 +44,7 @@ install(TARGETS
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
+
+if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif ()
