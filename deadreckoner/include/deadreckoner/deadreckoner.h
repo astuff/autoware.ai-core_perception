@@ -20,7 +20,7 @@ class DeadRecokner
 public:
   DeadRecokner();
 private:
-  ros::NodeHandle nh_, private_nh_;
+  ros::NodeHandle nh_;
   ros::Subscriber twist_sub_;
   ros::Publisher odom_pub_;
 

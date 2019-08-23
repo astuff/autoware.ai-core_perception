@@ -10,7 +10,7 @@
 
 #include "deadreckoner/deadreckoner.h"
 
-DeadRecokner::DeadRecokner() : nh_(), private_nh_("~")
+DeadRecokner::DeadRecokner() : nh_()
 {
   twist_sub_ = nh_.subscribe("current_twist", 10, &DeadRecokner::callbackFromCurrentTwist, this);
   odom_pub_ = nh_.advertise<nav_msgs::Odometry>("current_odom", 10);
