@@ -8,13 +8,15 @@ find_package(autoware_msgs REQUIRED)
 find_package(vector_map REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
+  camera_info_manager
   cmake_modules
   cv_bridge
   geometry_msgs
+  image_transport
   libvectormap
-  message_generation
   roscpp
   roslint
+  rospy
   sensor_msgs
   std_msgs
   tf
@@ -58,6 +60,8 @@ include_directories(
   ${Eigen3_INCLUDE_DIRS}
 )
 
+catkin_python_setup()
+
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS}
   CATKIN_DEPENDS
@@ -66,8 +70,8 @@ catkin_package(
   cv_bridge
   geometry_msgs
   libvectormap
-  message_runtime
   roscpp
+  rospy
   sensor_msgs
   std_msgs
   tf
@@ -76,12 +80,15 @@ catkin_package(
   visualization_msgs
 
   LIBRARIES libcontext
+
+  DEPENDS TinyXML
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
 roslint_cpp()
+roslint_python()
 
 ###########
 ## Build ##
@@ -262,7 +269,6 @@ if (USE_CUDA)
   ####################################################################################################
 
   if (EXISTS "${SSD_CAFFE_PATH}")
-
     find_package(CUDA REQUIRED)
 
     add_executable(
