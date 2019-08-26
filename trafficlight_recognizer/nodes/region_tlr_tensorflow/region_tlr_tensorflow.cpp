@@ -75,7 +75,7 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     return;
 
   // Acquire signal position on the image
-  Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols, use_converted_map_);
+  Context::SetContexts(&contexts_, extracted_pos, frame_.rows, frame_.cols, use_converted_map_);
 
   // Recognize the color of the traffic light
   for (Context &context : contexts_)
