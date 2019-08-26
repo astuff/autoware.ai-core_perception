@@ -48,6 +48,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(TinyXML REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -213,7 +214,6 @@ add_dependencies(
 
 ### label_maker ###
 find_package(Qt5Gui REQUIRED)
-find_package(TinyXML REQUIRED)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
 file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")
