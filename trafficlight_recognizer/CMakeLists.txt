@@ -7,43 +7,44 @@ find_package(autoware_msgs REQUIRED)
 
 find_package(vector_map REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
-        cmake_modules
-        cv_bridge
-        geometry_msgs
-        libvectormap
-        roscpp
-        roslint
-        sensor_msgs
-        std_msgs
-        tf
-        vector_map_server
-        visualization_msgs
-        autoware_msgs
-        vector_map
-        )
+  autoware_msgs
+  cmake_modules
+  cv_bridge
+  geometry_msgs
+  libvectormap
+  message_generation
+  roscpp
+  roslint
+  sensor_msgs
+  std_msgs
+  tf
+  vector_map
+  vector_map_server
+  visualization_msgs
+)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 QUIET)
 
 if (NOT EIGEN3_FOUND)
-    # Fallback to cmake_modules
-    find_package(cmake_modules REQUIRED)
-    find_package(Eigen REQUIRED)
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
-    set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
-    # Possibly map additional variables to the EIGEN3_ prefix.
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
 else ()
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif ()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-
 find_package(OpenGL REQUIRED)
 
 ###################################
@@ -65,6 +66,7 @@ catkin_package(
   cv_bridge
   geometry_msgs
   libvectormap
+  message_runtime
   roscpp
   sensor_msgs
   std_msgs
@@ -116,9 +118,9 @@ add_executable(
 
 target_link_libraries(
   region_tlr
+  libcontext
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
-  libcontext
   ${OPENGL_LIBRARIES}
 )
 
@@ -203,10 +205,7 @@ add_dependencies(
 )
 
 ### label_maker ###
-find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-
 find_package(TinyXML REQUIRED)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
@@ -355,6 +354,15 @@ if (USE_CUDA)
   else ()
     message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
   endif ()
+endif ()
+
+### region_tlr_mxnet ###
+####################################################################################################
+find_package(TensorFlow QUIET)
+
+if (TENSORFLOW_FOUND)
+else ()
+  message("'tensorflow' is not installed. 'region_tlr_tensorflow' will not be build.")
 endif ()
 
 if (CATKIN_ENABLE_TESTING)
