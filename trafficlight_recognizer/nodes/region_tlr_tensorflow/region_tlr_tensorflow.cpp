@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 AutonomouStuff, LLC
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -94,13 +110,17 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
       // Signal IDs: 32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33 (middle light)
       // Signal IDs: 34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88 (rightmost light)
       // Signal IDs: 66, 69, 72, 75, 78 (parts of all three, cannot see on map)
-      std::vector<int> signal_ids_to_shift_2 = {29, 20, 81, 19, 38, 21, 30, 28, 80, 39, 37, 82,
-                                                32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33,
-                                                34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88,
-                                                66, 69, 72, 75, 78
-                                               };
+      std::vector<int> signal_ids_to_shift_2 =
+      {
+        29, 20, 81, 19, 38, 21, 30, 28, 80, 39, 37, 82,
+        32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33,
+        34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88,
+        66, 69, 72, 75, 78
+       };
 
-      if (std::find(signal_ids_to_shift_1.begin(), signal_ids_to_shift_1.end(), context.signalID) != signal_ids_to_shift_1.end())
+      if (std::find(signal_ids_to_shift_1.begin(),
+                    signal_ids_to_shift_1.end(),
+                    context.signalID) != signal_ids_to_shift_1.end())
       {
         int new_tl_x = context.topLeft.x + -25;
         int new_br_x = context.botRight.x + -25;
@@ -146,7 +166,9 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
         context.topLeft = cv::Point(new_tl_x, new_tl_y);
         context.botRight = cv::Point(new_br_x, new_br_y);
       }
-      else if (std::find(signal_ids_to_shift_2.begin(), signal_ids_to_shift_2.end(), context.signalID) != signal_ids_to_shift_2.end())
+      else if (std::find(signal_ids_to_shift_2.begin(),
+                         signal_ids_to_shift_2.end(),
+                         context.signalID) != signal_ids_to_shift_2.end())
       {
         int new_tl_x = context.topLeft.x + -20;
         int new_br_x = context.botRight.x + -20;
@@ -227,7 +249,7 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     // unless the new state is found at least change_state_threshold_ times
     if (confidence >= score_threshold_)
     {
-      DetermineState(current_state, context);
+      DetermineState(current_state, &context);
     }
   }
 
@@ -303,33 +325,33 @@ void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
  * @param current_state the current state of the traffic light as reported by the classifier.
  * @param in_out_signal_context the object containing the data of the current Traffic Light instance.
  */
-void RegionTLRTensorFlowROSNode::DetermineState(LightState in_current_state,
-    Context& in_out_signal_context)
+void RegionTLRTensorFlowROSNode::DetermineState(const LightState& in_current_state,
+                                                Context* in_out_signal_context)
 {
-  //if reported state by classifier is different than the previously stored
-  if (in_current_state != in_out_signal_context.lightState)
+  // if reported state by classifier is different than the previously stored
+  if (in_current_state != in_out_signal_context->lightState)
   {
-    //and also different from the previous difference
-    if (in_current_state != in_out_signal_context.newCandidateLightState)
+    // and also different from the previous difference
+    if (in_current_state != in_out_signal_context->newCandidateLightState)
     {
-      //set classifier result as a candidate
-      in_out_signal_context.newCandidateLightState = in_current_state;
-      in_out_signal_context.stateJudgeCount = 0;
+      // set classifier result as a candidate
+      in_out_signal_context->newCandidateLightState = in_current_state;
+      in_out_signal_context->stateJudgeCount = 0;
     }
     else
     {
-      //if classifier returned the same result previously, then increase its confidence
-      in_out_signal_context.stateJudgeCount++;
+      // if classifier returned the same result previously, then increase its confidence
+      in_out_signal_context->stateJudgeCount++;
 
-      if (in_out_signal_context.stateJudgeCount > change_state_threshold_)
+      if (in_out_signal_context->stateJudgeCount > change_state_threshold_)
       {
-        in_out_signal_context.stateJudgeCount = change_state_threshold_;  // prevent overflow
+        in_out_signal_context->stateJudgeCount = change_state_threshold_;  // prevent overflow
       }
 
-      //if new candidate has been found enough times, change state to the new candidate
-      if (in_out_signal_context.stateJudgeCount >= change_state_threshold_)
+      // if new candidate has been found enough times, change state to the new candidate
+      if (in_out_signal_context->stateJudgeCount >= change_state_threshold_)
       {
-        in_out_signal_context.lightState = in_current_state;
+        in_out_signal_context->lightState = in_current_state;
       }
     }
   }
@@ -369,7 +391,7 @@ void RegionTLRTensorFlowROSNode::PublishTrafficLight(std::vector<Context> contex
 
   // If state changes from previous one, publish it
   static ros::Time prev_time = ros::Time::now();
-  double timeout = 10.0; //seconds
+  double timeout = 10.0;  // seconds
   if (topic.traffic_light != previous_state || ros::Time::now() - prev_time > ros::Duration(timeout))
   {
     prev_time = ros::Time::now();
@@ -663,7 +685,8 @@ int main(int argc, char *argv[])
 
   // Create RegionTLRTensorFlowROSNode class object and do initialization
   RegionTLRTensorFlowROSNode region_tlr_tensorflow_ros_node;
-  region_tlr_tensorflow_ros_node.srv_client = n.serviceClient<autoware_msgs::RecognizeLightState>("recognize_light_state", false);
+  region_tlr_tensorflow_ros_node.srv_client =
+    n.serviceClient<autoware_msgs::RecognizeLightState>("recognize_light_state", false);
   region_tlr_tensorflow_ros_node.srv_client.waitForExistence();
 
   // Start recognition process
