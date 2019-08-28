@@ -36,9 +36,9 @@ class RegionTLRTensorFlowROSNode
 {
 public:
   RegionTLRTensorFlowROSNode();
-  ~RegionTLRTensorFlowROSNode();
 
-  void RunRecognition();
+  void GetROSParam();
+  void StartSubscribersAndPublishers();
   void ImageRawCallback(const sensor_msgs::ImageConstPtr &msg);
   void ROISignalCallback(const autoware_msgs::Signals::ConstPtr &extracted_pos);
 
@@ -49,8 +49,6 @@ public:
   ros::ServiceClient srv_client;
 
 private:
-  void GetROSParam();
-  void StartSubscribersAndPublishers();
   void DetermineState(const LightState& in_current_state, Context* in_out_signal_context);
   void PublishTrafficLight(std::vector<Context> contexts);
   void PublishString(std::vector<Context> contexts);

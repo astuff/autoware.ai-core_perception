@@ -46,18 +46,6 @@ RegionTLRTensorFlowROSNode::RegionTLRTensorFlowROSNode() :
 {
 }
 
-RegionTLRTensorFlowROSNode::~RegionTLRTensorFlowROSNode()
-{
-}
-
-void RegionTLRTensorFlowROSNode::RunRecognition()
-{
-  GetROSParam();  // get execution parameters from ROS parameter server
-  StartSubscribersAndPublishers();
-  ROS_INFO("Node initialized, waiting for signals from feat_proj...");
-  ros::spin();
-}
-
 void RegionTLRTensorFlowROSNode::ImageRawCallback(const sensor_msgs::ImageConstPtr &msg)
 {
   auto se_frame = cv_bridge::toCvShare(msg);
@@ -586,7 +574,6 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
   std::vector<int> already_drawn;
   for (const auto ctx : contexts)
   {
-    // ROS_INFO("***%d", ctx.closestLaneId);
     if (std::find(already_drawn.begin(), already_drawn.end(), ctx.closestLaneId) != already_drawn.end()
         || ctx.closestLaneId == -1)
       continue;
@@ -690,7 +677,10 @@ int main(int argc, char *argv[])
   region_tlr_tensorflow_ros_node.srv_client.waitForExistence();
 
   // Start recognition process
-  region_tlr_tensorflow_ros_node.RunRecognition();
+  region_tlr_tensorflow_ros_node.GetROSParam();  // get execution parameters from ROS parameter server
+  region_tlr_tensorflow_ros_node.StartSubscribersAndPublishers();
+  ROS_INFO("Node initialized, waiting for signals from feat_proj...");
+  ros::spin();
 
   return 0;
 }
