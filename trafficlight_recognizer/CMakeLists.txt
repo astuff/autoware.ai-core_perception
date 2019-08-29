@@ -7,45 +7,49 @@ find_package(autoware_msgs REQUIRED)
 
 find_package(vector_map REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
-        cmake_modules
-        cv_bridge
-        geometry_msgs
-        libvectormap
-        roscpp
-        roslint
-        sensor_msgs
-        std_msgs
-        tf
-        vector_map_server
-        visualization_msgs
-        autoware_msgs
-        vector_map
-        lanelet2_extension
-        )
+  autoware_msgs
+  camera_info_manager
+  cmake_modules
+  cv_bridge
+  geometry_msgs
+  image_transport
+  libvectormap
+  roscpp
+  roslint
+  rospy
+  sensor_msgs
+  std_msgs
+  tf
+  vector_map
+  vector_map_server
+  visualization_msgs
+)
+>>>>>>> Feature/tld tensorflow
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 QUIET)
 
 if (NOT EIGEN3_FOUND)
-    # Fallback to cmake_modules
-    find_package(cmake_modules REQUIRED)
-    find_package(Eigen REQUIRED)
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
-    set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
-    # Possibly map additional variables to the EIGEN3_ prefix.
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
 else ()
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif ()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-
 find_package(OpenGL REQUIRED)
+find_package(TinyXML REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -56,6 +60,8 @@ include_directories(
   ${Eigen3_INCLUDE_DIRS}
 )
 
+catkin_python_setup()
+
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS}
   CATKIN_DEPENDS
@@ -65,6 +71,7 @@ catkin_package(
   geometry_msgs
   libvectormap
   roscpp
+  rospy
   sensor_msgs
   std_msgs
   tf
@@ -73,6 +80,8 @@ catkin_package(
   visualization_msgs
 
   LIBRARIES libcontext
+
+  DEPENDS TinyXML
 )
 
 
@@ -81,6 +90,7 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
 roslint_cpp()
+roslint_python()
 
 ###########
 ## Build ##
@@ -117,9 +127,9 @@ add_executable(
 
 target_link_libraries(
   region_tlr
+  libcontext
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
-  libcontext
   ${OPENGL_LIBRARIES}
 )
 
@@ -222,9 +232,6 @@ add_dependencies(
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-
-find_package(TinyXML REQUIRED)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
 file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")
@@ -280,7 +287,6 @@ if (USE_CUDA)
   ####################################################################################################
 
   if (EXISTS "${SSD_CAFFE_PATH}")
-
     find_package(CUDA REQUIRED)
 
     add_executable(
@@ -372,6 +378,48 @@ if (USE_CUDA)
   else ()
     message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
   endif ()
+endif ()
+
+### region_tlr_mxnet ###
+####################################################################################################
+find_package(TensorFlow QUIET)
+
+if (TENSORFLOW_FOUND)
+  add_executable(
+    region_tlr_tensorflow
+    nodes/region_tlr_tensorflow/region_tlr_tensorflow.cpp
+  )
+
+  target_include_directories(
+    region_tlr_tensorflow PRIVATE
+    ${OpenCV_INCLUDE_DIRS}
+  )
+
+  target_link_libraries(
+    region_tlr_tensorflow
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    libcontext
+  )
+
+  add_dependencies(
+    region_tlr_tensorflow
+    ${catkin_EXPORTED_TARGETS}
+  )
+
+  install(
+    TARGETS region_tlr_tensorflow
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+  catkin_install_python(
+    PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+else ()
+  message("'tensorflow' is not installed. 'region_tlr_tensorflow' will not be build.")
 endif ()
 
 if (CATKIN_ENABLE_TESTING)
