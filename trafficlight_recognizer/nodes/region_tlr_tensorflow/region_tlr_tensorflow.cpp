@@ -104,7 +104,7 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
         32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33,
         34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88,
         66, 69, 72, 75, 78
-       };
+      };
 
       if (std::find(signal_ids_to_shift_1.begin(),
                     signal_ids_to_shift_1.end(),
