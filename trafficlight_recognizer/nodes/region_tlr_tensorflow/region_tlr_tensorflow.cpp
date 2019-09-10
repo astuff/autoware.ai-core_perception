@@ -29,20 +29,15 @@
 #include "trafficlight_recognizer/context.h"
 #include "trafficlight_recognizer/region_tlr_tensorflow/region_tlr_tensorflow.h"
 
+using namespace RegionTLRTensorFlow;  // NOLINT
+
 RegionTLRTensorFlowROSNode::RegionTLRTensorFlowROSNode() :
   image_topic_name_("/image_raw"),
   roi_topic_name_("/roi_signal"),
   score_threshold_(0),
   change_state_threshold_(2),
   use_converted_map_(false),
-  use_peoria_hacks_(false),
-  kAdvertiseInLatch_(true),
-  kTrafficLightRed(0),
-  kTrafficLightGreen(1),
-  kTrafficLightUnknown(2),
-  kStringRed("red signal"),
-  kStringGreen("green signal"),
-  kStringUnknown("")
+  use_peoria_hacks_(false)
 {
 }
 
@@ -77,6 +72,9 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
   // Abort this callback if a new image is not available
   if (frame_.empty() || frame_header_.stamp == previous_timestamp)
     return;
+
+  // The vector of data structure to save traffic light state, position, ...etc
+  std::vector<Context> contexts_;
 
   // Acquire signal position on the image
   Context::SetContexts(&contexts_, extracted_pos, frame_.rows, frame_.cols, use_converted_map_);
@@ -289,7 +287,7 @@ void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
   // Register publishers
   signal_state_publisher = node_handle.advertise<autoware_msgs::TrafficLight>("light_color", 1);
   signal_state_string_publisher = node_handle.advertise<std_msgs::String>("sound_player", 1);
-  marker_publisher = node_handle.advertise<visualization_msgs::MarkerArray>("tlr_result", 1, kAdvertiseInLatch_);
+  marker_publisher = node_handle.advertise<visualization_msgs::MarkerArray>("tlr_result", 1, true);
   superimpose_image_publisher = node_handle.advertise<sensor_msgs::Image>("tlr_superimpose_image", 1);
   roi_image_publisher = node_handle.advertise<sensor_msgs::Image>("tlr_roi_image", 1);
 
@@ -348,22 +346,22 @@ void RegionTLRTensorFlowROSNode::DetermineState(const LightState& in_current_sta
 void RegionTLRTensorFlowROSNode::PublishTrafficLight(std::vector<Context> contexts)
 {
   autoware_msgs::TrafficLight topic;
-  static int32_t previous_state = kTrafficLightUnknown;
-  topic.traffic_light = kTrafficLightUnknown;
+  static int32_t previous_state = LightState::UNDEFINED;
+  topic.traffic_light = LightState::UNDEFINED;
 
   for (const auto ctx : contexts)
   {
     switch (ctx.lightState)
     {
     case GREEN:
-      topic.traffic_light = kTrafficLightGreen;
+      topic.traffic_light = LightState::GREEN;
       break;
     case YELLOW:  // Autoware currently treats yellow as red.
     case RED:
-      topic.traffic_light = kTrafficLightRed;
+      topic.traffic_light = LightState::RED;
       break;
     case UNDEFINED:
-      topic.traffic_light = kTrafficLightUnknown;
+      topic.traffic_light = LightState::UNDEFINED;
       break;
     }
 
@@ -371,7 +369,7 @@ void RegionTLRTensorFlowROSNode::PublishTrafficLight(std::vector<Context> contex
     // which has largest estimated radius of signal.
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
-    if (topic.traffic_light != kTrafficLightUnknown)
+    if (topic.traffic_light != LightState::UNDEFINED)
     {
       break;
     }
@@ -391,21 +389,21 @@ void RegionTLRTensorFlowROSNode::PublishTrafficLight(std::vector<Context> contex
 void RegionTLRTensorFlowROSNode::PublishString(std::vector<Context> contexts)
 {
   std_msgs::String topic;
-  static std::string previous_state = kStringUnknown;
-  topic.data = kStringUnknown;
+  static std::string previous_state = UNKNOWN_STRING;
+  topic.data = UNKNOWN_STRING;
   for (const auto ctx : contexts)
   {
     switch (ctx.lightState)
     {
     case GREEN:
-      topic.data = kStringGreen;
+      topic.data = GREEN_STRING;
       break;
     case YELLOW:  // Autoware currently treats yellow as red.
     case RED:
-      topic.data = kStringRed;
+      topic.data = RED_STRING;
       break;
     case UNDEFINED:
-      topic.data = kStringUnknown;
+      topic.data = UNKNOWN_STRING;
       break;
     }
 
@@ -413,7 +411,7 @@ void RegionTLRTensorFlowROSNode::PublishString(std::vector<Context> contexts)
     // which has largest estimated radius of signal.
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
-    if (topic.data != kStringUnknown)
+    if (topic.data != UNKNOWN_STRING)
     {
       break;
     }
@@ -506,17 +504,17 @@ void RegionTLRTensorFlowROSNode::PublishMarkerArray(std::vector<Context> context
     green_light.pose.orientation.w = 0.0;
 
     // Set the scale of the markers. We assume lamp radius is 30cm in real world
-    red_light.scale.x = LIGHT_SIZE;
-    red_light.scale.y = LIGHT_SIZE;
-    red_light.scale.z = LIGHT_SIZE;
+    red_light.scale.x = RegionTLRTensorFlow::LIGHT_SIZE;
+    red_light.scale.y = RegionTLRTensorFlow::LIGHT_SIZE;
+    red_light.scale.z = RegionTLRTensorFlow::LIGHT_SIZE;
 
-    yellow_light.scale.x = LIGHT_SIZE;
-    yellow_light.scale.y = LIGHT_SIZE;
-    yellow_light.scale.z = LIGHT_SIZE;
+    yellow_light.scale.x = RegionTLRTensorFlow::LIGHT_SIZE;
+    yellow_light.scale.y = RegionTLRTensorFlow::LIGHT_SIZE;
+    yellow_light.scale.z = RegionTLRTensorFlow::LIGHT_SIZE;
 
-    green_light.scale.x = LIGHT_SIZE;
-    green_light.scale.y = LIGHT_SIZE;
-    green_light.scale.z = LIGHT_SIZE;
+    green_light.scale.x = RegionTLRTensorFlow::LIGHT_SIZE;
+    green_light.scale.y = RegionTLRTensorFlow::LIGHT_SIZE;
+    green_light.scale.z = RegionTLRTensorFlow::LIGHT_SIZE;
 
     // Set the color for each marker
     switch (ctx.lightState)
@@ -624,16 +622,16 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
     switch (ctx.lightState)
     {
     case GREEN:
-      topic.data = kStringGreen;
+      topic.data = GREEN_STRING;
       label_color = CV_RGB(0, 255, 0);
       break;
     case YELLOW:  // Autoware currently treats yellow as red.
     case RED:
-      topic.data = kStringRed;
+      topic.data = RED_STRING;
       label_color = CV_RGB(255, 0, 0);
       break;
     case UNDEFINED:
-      topic.data = kStringUnknown;
+      topic.data = UNKNOWN_STRING;
       label_color = CV_RGB(0, 0, 0);
     }
 
@@ -641,7 +639,7 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
     // which has largest estimated radius of signal.
     // This program assume that the signal which has the largest estimated radius
     // equal the nearest one from camera.
-    if (topic.data != kStringUnknown)
+    if (topic.data != UNKNOWN_STRING)
     {
       break;
     }

@@ -32,6 +32,15 @@
 
 #include "trafficlight_recognizer/context.h"
 
+namespace RegionTLRTensorFlow
+{
+
+// Size of traffic light in cm
+static constexpr float LIGHT_SIZE = 0.3;
+static constexpr char RED_STRING[] = "red signal";
+static constexpr char GREEN_STRING[] = "green signal";
+static constexpr char UNKNOWN_STRING[] = "";
+
 class RegionTLRTensorFlowROSNode
 {
 public:
@@ -42,9 +51,6 @@ public:
   void ImageRawCallback(const sensor_msgs::ImageConstPtr &msg);
   void ROISignalCallback(const autoware_msgs::Signals::ConstPtr &extracted_pos);
 
-  // The vector of data structure to save traffic light state, position, ...etc
-  std::vector<Context> contexts_;
-
   // Service client
   ros::ServiceClient srv_client;
 
@@ -54,7 +60,6 @@ private:
   void PublishString(std::vector<Context> contexts);
   void PublishMarkerArray(std::vector<Context> contexts);
   void PublishImage(std::vector<Context> contexts);
-  void SuperimposeCb(const std_msgs::Bool::ConstPtr &config_msg);
 
   // Execution parameter
   std::string image_topic_name_;
@@ -68,7 +73,6 @@ private:
   // Subscribers
   image_transport::Subscriber image_subscriber;
   ros::Subscriber roi_signal_subscriber;
-  ros::Subscriber superimpose_sub;
 
   // Publishers
   ros::Publisher signal_state_publisher;
@@ -77,25 +81,13 @@ private:
   ros::Publisher superimpose_image_publisher;
   ros::Publisher roi_image_publisher;
 
-  // Flag to show topic will be published in latch manner
-  bool kAdvertiseInLatch_;
-
   // A frame image acquired from topic
   cv::Mat frame_;
 
   // Timestamp of a frame in process
   std_msgs::Header frame_header_;
-
-  // constant values to pass recognition states to other nodes
-  const int32_t kTrafficLightRed;
-  const int32_t kTrafficLightGreen;
-  const int32_t kTrafficLightUnknown;
-  const std::string kStringRed;
-  const std::string kStringGreen;
-  const std::string kStringUnknown;
-
-  // Size of traffic light in cm
-  const float LIGHT_SIZE = 0.3;
 };
+
+}  // namespace RegionTLRTensorFlow
 
 #endif  // TRAFFICLIGHT_RECOGNIZER_REGION_TLR_TENSORFLOW_REGION_TLR_TENSORFLOW_H
