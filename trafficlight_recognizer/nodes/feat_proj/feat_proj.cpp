@@ -1,12 +1,12 @@
 /*
  * Copyright 2015 sujiwo
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -221,7 +221,7 @@ Point3 transform(const Point3& psrc, const tf::StampedTransform& tfsource)
 bool project2(const Point3& pt, int* u, int* v, bool useOpenGLCoord = false)
 {
   float nearPlane = 1.0;
-  float farPlane = 200.0;
+  float farPlane = 100.0;
   Point3 _pt = transform(pt, trf);
   float _u = _pt.x() * fx / _pt.z() + cx;
   float _v = _pt.y() * fy / _pt.z() + cy;
@@ -387,22 +387,24 @@ int main(int argc, char* argv[])
       rosnode.subscribe("vector_map_info/point", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_points, &vmap);
   ros::Subscriber sub_line =
       rosnode.subscribe("vector_map_info/line", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_lines, &vmap);
-  ros::Subscriber sub_lane =
-      rosnode.subscribe("vector_map_info/lane", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_lanes, &vmap);
+  // ros::Subscriber sub_lane =
+  //     rosnode.subscribe("vector_map_info/lane", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_lanes, &vmap);
   ros::Subscriber sub_vector =
       rosnode.subscribe("vector_map_info/vector", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_vectors, &vmap);
   ros::Subscriber sub_signal =
       rosnode.subscribe("vector_map_info/signal", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_signals, &vmap);
-  ros::Subscriber sub_whiteline =
-      rosnode.subscribe("vector_map_info/white_line", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_whitelines, &vmap);
-  ros::Subscriber sub_dtlane =
-      rosnode.subscribe("vector_map_info/dtlane", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_dtlanes, &vmap);
+  // ros::Subscriber sub_whiteline =
+  //     rosnode.subscribe("vector_map_info/white_line", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_whitelines, &vmap);
+  // ros::Subscriber sub_dtlane =
+  //     rosnode.subscribe("vector_map_info/dtlane", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_dtlanes, &vmap);
 
   /* wait until loading all vector map is completed */
-  ros::Rate wait_rate(100);
-  std::cout << "Loading Vector Map. Please wait";
-  while (vmap.points.empty() || vmap.lines.empty() || vmap.whitelines.empty() || vmap.lanes.empty() ||
-         vmap.dtlanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
+  ros::Rate wait_rate(0.5);
+  // std::cout << "Loading Vector Map. Please wait";
+  ROS_INFO("Loading Vector Map ...");
+  // while (vmap.points.empty() || vmap.lines.empty() || vmap.whitelines.empty() || vmap.lanes.empty() ||
+  //        vmap.dtlanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
+  while (vmap.points.empty() || vmap.lines.empty() || vmap.vectors.empty() || vmap.signals.empty())
   {
     ros::spinOnce();
     std::cout << ".";
@@ -410,7 +412,8 @@ int main(int argc, char* argv[])
   }
 
   vmap.loaded = true;
-  std::cout << "Loaded." << std::endl;
+  // std::cout << "Loaded." << std::endl;
+  ROS_INFO("Vector map loaded");
 
   ros::Subscriber cameraInfoSubscriber = rosnode.subscribe(cameraInfo_topic_name, 100, cameraInfoCallback);
   ros::Subscriber cameraImage = rosnode.subscribe(cameraInfo_topic_name, 100, cameraInfoCallback);
