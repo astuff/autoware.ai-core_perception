@@ -52,7 +52,9 @@ void RegionTLRTensorFlowROSNode::ImageRawCallback(const sensor_msgs::ImageConstP
 
   if (msg->encoding == "rgb8")
   {
-    frame_ = se_frame->image;
+    // Deep copy the image since se_frame is a shared pointer
+    // cvtColor will also perform a deep copy
+    frame_ = se_frame->image.clone();
   }
   else if (msg->encoding == "bgr8")
   {
