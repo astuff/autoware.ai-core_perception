@@ -7,11 +7,12 @@
 class NmeaHelper
 {
 public:
-  NmeaHelper() : rcvd_msg()
+  NmeaHelper() :
+    rcvd_msg()
   {
   }
 
-  void pose_callback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+  void pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg)
   {
     rcvd_msg = *msg;
     ROS_ERROR("Got message!");

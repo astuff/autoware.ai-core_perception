@@ -24,7 +24,6 @@ find_package(catkin REQUIRED COMPONENTS
   vector_map_server
   visualization_msgs
 )
->>>>>>> Feature/tld tensorflow
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 QUIET)
