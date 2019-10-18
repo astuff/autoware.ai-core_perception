@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   geometry_msgs
   image_transport
+  lanelet2_extension
   libvectormap
   roscpp
   roslint
