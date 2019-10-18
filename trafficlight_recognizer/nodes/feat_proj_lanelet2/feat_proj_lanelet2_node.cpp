@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Autoware Foundation. All rights reserved.
+ * Copyright 2019 Autoware Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Authors: Simon Thompson
+ * 
  */
 
-#include "ekf_localizer/ekf_localizer.h"
+#include <ros/ros.h>
+#include <trafficlight_recognizer/feat_proj_lanelet2/feat_proj_lanelet2_core.h>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "ekf_localizer");
-  EKFLocalizer obj;
+  ros::init(argc, argv, "feat_proj_lanelet2");
+  trafficlight_recognizer::FeatProjLanelet2 fp_ll2;
 
-  ros::spin();
+  fp_ll2.init();
+
+  fp_ll2.run();
 
   return 0;
-};
+}
