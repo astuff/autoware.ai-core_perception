@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-#include "ekf_localizer/ekf_localizer.h"
+#include "twist_generator/vehicle_status_converter.hpp"
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "ekf_localizer");
-  EKFLocalizer obj;
-
+  ros::init(argc, argv, "twist_generator");
+  VehicleStatusConverter obj;
   ros::spin();
-
   return 0;
 };
