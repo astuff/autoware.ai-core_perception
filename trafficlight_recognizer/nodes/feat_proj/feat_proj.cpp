@@ -353,7 +353,7 @@ void echoSignals2(const ros::Publisher& pub, bool useOpenGLCoord = false)
   signalsInFrame.header.stamp = ros::Time::now();
   pub.publish(signalsInFrame);
 
-  ROS_DEBUG("There are %f signals in range", signalsInFrame.Signals.size());
+  ROS_DEBUG("There are %d signals in range", signalsInFrame.Signals.size());
 }
 
 void interrupt(int s)
