@@ -394,8 +394,7 @@ int main(int argc, char* argv[])
       rosnode.subscribe("vector_map_info/signal", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_signals, &vmap);
 
   /* wait until loading all vector map is completed */
-  ros::Rate wait_rate(100);
-  ROS_INFO("Loading Vector Map. Please wait");
+  ros::Rate wait_rate(10);
   while (vmap.points.empty() || vmap.lines.empty() || vmap.lanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
   {
     ros::spinOnce();
