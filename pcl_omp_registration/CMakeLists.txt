@@ -3,6 +3,11 @@ project(pcl_omp_registration)
 
 find_package(catkin REQUIRED COMPONENTS)
 find_package(PCL REQUIRED)
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif ()
 
 catkin_package(
         INCLUDE_DIRS include
