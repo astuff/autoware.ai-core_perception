@@ -353,7 +353,7 @@ void echoSignals2(const ros::Publisher& pub, bool useOpenGLCoord = false)
   signalsInFrame.header.stamp = ros::Time::now();
   pub.publish(signalsInFrame);
 
-  ROS_DEBUG("There are %d signals in range", signalsInFrame.Signals.size());
+  ROS_DEBUG("There are %lu signals in range", signalsInFrame.Signals.size());
 }
 
 void interrupt(int s)
@@ -397,7 +397,8 @@ int main(int argc, char* argv[])
 
   /* wait until loading all vector map is completed */
   ros::Rate wait_rate(10);
-  while (vmap.points.empty() || vmap.lines.empty() || vmap.lanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
+  while (vmap.points.empty() || vmap.lines.empty() || vmap.lanes.empty() || vmap.vectors.empty()
+    || vmap.signals.empty())
   {
     ros::spinOnce();
     ROS_INFO_THROTTLE(2, "Waiting for Vector Map");
