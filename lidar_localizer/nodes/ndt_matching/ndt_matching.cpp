@@ -1369,11 +1369,11 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     transform.setRotation(current_q);
     if (_use_local_transform == true)
     {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", _output_tf_frame_id));
+      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "map", _output_tf_frame_id));
     }
     else
     {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _output_tf_frame_id));
+      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "map", _output_tf_frame_id));
     }
 
     matching_end = std::chrono::system_clock::now();
