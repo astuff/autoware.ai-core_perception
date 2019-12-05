@@ -127,9 +127,9 @@ add_executable(
 
 target_link_libraries(
   region_tlr
-  libcontext
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
+  libcontext
   ${OPENGL_LIBRARIES}
 )
 
@@ -232,6 +232,9 @@ add_dependencies(
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+find_package(TinyXML REQUIRED)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
 file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")

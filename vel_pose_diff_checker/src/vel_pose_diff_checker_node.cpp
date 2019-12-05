@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#include <imm_ukf_pda/imm_ukf_pda.h>
+#include "vel_pose_diff_checker/vel_pose_diff_checker_core.h"
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "imm_ukf_pda_tracker");
-  ImmUkfPda app;
-  app.run();
-  ros::spin();
+  ros::init(argc, argv, "vel_pose_diff_checker");
+  ros::NodeHandle nh;
+  ros::NodeHandle private_nh("~");
+
+  VelPoseDiffChecker node(nh, private_nh);
+  node.run();
+
   return 0;
 }
