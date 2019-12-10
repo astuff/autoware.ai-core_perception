@@ -1,12 +1,12 @@
 /*
  * Copyright 2015 sujiwo
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -222,13 +222,15 @@ Point3 transform(const Point3& psrc, const tf::StampedTransform& tfsource)
  */
 bool project2(const Point3& pt, int* u, int* v, bool useOpenGLCoord = false)
 {
+  float nearPlane = 1.0;
+  float farPlane = 200.0;
   Point3 _pt = transform(pt, trf);
   float _u = _pt.x() * fx / _pt.z() + cx;
   float _v = _pt.y() * fy / _pt.z() + cy;
 
   *u = static_cast<int>(_u);
   *v = static_cast<int>(_v);
-  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < near_plane_ || far_plane_ < _pt.z())
+  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < nearPlane || farPlane < _pt.z())
   {
     *u = -1, *v = -1;
     return false;
