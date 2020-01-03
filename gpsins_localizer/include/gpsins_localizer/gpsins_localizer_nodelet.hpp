@@ -22,6 +22,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <novatel_gps_msgs/Inspva.h>
+#include <novatel_gps_msgs/NovatelPosition.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Point.h>
@@ -42,13 +43,14 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     // Subscriber callbacks
     void insDataCb(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
+    void bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg);
 
     // Util functions
     void broadcastTf(tf2::Transform transform, ros::Time stamp);
     void publishPose(tf2::Transform pose, ros::Time stamp);
-    void pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+    void pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
-    void createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
+    void createMapFrame(novatel_gps_msgs::Inspva inspva_msg);
     tf2::Transform calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
     void checkInitialize(std::string ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
@@ -65,6 +67,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     tf2_ros::StaticTransformBroadcaster stf_bc;
 
     // Subscribers
+    ros::Subscriber bestpos_sub;
     message_filters::Subscriber<novatel_gps_msgs::Inspva> inspva_sub;
     message_filters::Subscriber<sensor_msgs::Imu> imu_sub;
     message_filters::Synchronizer<MySyncPolicy>* sync;
@@ -82,6 +85,8 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     std::string mgrs_zone = "";
     tf2::Transform prev_mgrs_pose;
     bool mgrs_pose_frozen = false;
+    bool received_undulation = false;
+    float undulation = 0.0;
 
     // Parameters
     std::string imu_data_topic_name = "gps/imu";
@@ -91,6 +96,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     std::string measured_gps_frame = "gps_measured";
     std::string static_gps_frame = "gps";
     bool no_solution_init = false;
+    bool msl_height = false;
     bool mgrs_mode = false;
 };
 

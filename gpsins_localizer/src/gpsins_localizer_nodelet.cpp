@@ -37,9 +37,13 @@ void GpsInsLocalizerNl::onInit()
     // Subscribers
     this->inspva_sub.subscribe(this->nh, this->ins_data_topic_name, 10);
     this->imu_sub.subscribe(this->nh, this->imu_data_topic_name, 10);
-
     this->sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10), this->inspva_sub, this->imu_sub);
     this->sync->registerCallback(boost::bind(&GpsInsLocalizerNl::insDataCb, this, _1, _2));
+
+    if (this->msl_height)
+    {
+        this->bestpos_sub = nh.subscribe("gps/bestpos", 1, &GpsInsLocalizerNl::bestposCb, this);
+    }
 }
 
 void GpsInsLocalizerNl::loadParams()
@@ -51,6 +55,7 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
     this->pnh.param("no_solution_init", this->no_solution_init, false);
+    this->pnh.param("msl_height", this->msl_height, false);
     this->pnh.param("mgrs_mode", this->mgrs_mode, false);
 
     // Simplified MGRS mode
@@ -68,15 +73,30 @@ void GpsInsLocalizerNl::insDataCb(
     const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
+    novatel_gps_msgs::Inspva inspva = *inspva_msg;
+
+    if (this->msl_height)
+    {
+        if (this->received_undulation)
+        {
+            inspva.height = inspva_msg->height + this->undulation;
+        }
+        else
+        {
+            ROS_WARN_THROTTLE(2, "Waiting for bestpos message");
+            return;
+        }
+    }
+
     // We don't need any static TFs for this function, so no need to wait
     // for init
     if (this->create_map_frame)
     {
-        createMapFrame(inspva_msg);
+        createMapFrame(inspva);
     }
 
     // Don't continue if uninitialized
-    checkInitialize(inspva_msg->status);
+    checkInitialize(inspva.status);
     if (!this->initialized)
     {
         return;
@@ -90,9 +110,9 @@ void GpsInsLocalizerNl::insDataCb(
     if (this->mgrs_mode)
     {
         baselink_map = convertECEFtoMGRS(baselink_earth,
-            inspva_msg->roll * M_PI / 180,
-            inspva_msg->pitch * M_PI / 180,
-            inspva_msg->azimuth * M_PI / 180);
+            inspva.roll * M_PI / 180,
+            inspva.pitch * M_PI / 180,
+            inspva.azimuth * M_PI / 180);
     }
     else
     {
@@ -100,9 +120,15 @@ void GpsInsLocalizerNl::insDataCb(
     }
 
     // publish
-    broadcastTf(baselink_map, inspva_msg->header.stamp);
-    publishPose(baselink_map, inspva_msg->header.stamp);
-    pubishVelocity(inspva_msg, imu_msg);
+    broadcastTf(baselink_map, inspva.header.stamp);
+    publishPose(baselink_map, inspva.header.stamp);
+    pubishVelocity(inspva, imu_msg);
+}
+
+void GpsInsLocalizerNl::bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg)
+{
+    this->undulation = bestpos_msg->undulation;
+    this->received_undulation = true;
 }
 
 void GpsInsLocalizerNl::broadcastTf(tf2::Transform transform, ros::Time stamp)
@@ -125,17 +151,17 @@ void GpsInsLocalizerNl::publishPose(tf2::Transform pose, ros::Time stamp)
     this->pose_pub.publish(pose_stamped);
 }
 
-void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+void GpsInsLocalizerNl::pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
     // GPS velocity
-    double n_vel = inspva_msg->north_velocity;
-    double e_vel = inspva_msg->east_velocity;
+    double n_vel = inspva_msg.north_velocity;
+    double e_vel = inspva_msg.east_velocity;
     double gps_velocity = sqrt(n_vel * n_vel + e_vel * e_vel);
 
     // Publish Twist in the base_link frame
     geometry_msgs::TwistStamped twist_bl;
-    twist_bl.header.stamp = inspva_msg->header.stamp;
+    twist_bl.header.stamp = inspva_msg.header.stamp;
     twist_bl.header.frame_id = "base_link";
     twist_bl.twist.linear.x = gps_velocity;
     twist_bl.twist.linear.y = 0.0;
@@ -146,13 +172,13 @@ void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr&
     this->velocity_pub.publish(twist_bl);
 }
 
-void GpsInsLocalizerNl::createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
+void GpsInsLocalizerNl::createMapFrame(novatel_gps_msgs::Inspva inspva_msg)
 {
     tf2::Transform new_earth_map_tf = convertLLHtoECEF(
-        inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
+        inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height);
 
     geometry_msgs::TransformStamped earth_map_tfs_msg;
-    earth_map_tfs_msg.header.stamp = inspva_msg->header.stamp;
+    earth_map_tfs_msg.header.stamp = inspva_msg.header.stamp;
     earth_map_tfs_msg.header.frame_id = "earth";
     earth_map_tfs_msg.child_frame_id = "map";
     tf2::convert(new_earth_map_tf, earth_map_tfs_msg.transform);
