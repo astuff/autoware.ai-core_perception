@@ -51,7 +51,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     void pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
     void createMapFrame(novatel_gps_msgs::Inspva inspva_msg);
-    tf2::Transform calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
+    tf2::Transform calculateBaselinkPose(novatel_gps_msgs::Inspva inspva_msg);
     void checkInitialize(std::string ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);

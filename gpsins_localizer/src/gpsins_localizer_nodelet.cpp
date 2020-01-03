@@ -73,13 +73,14 @@ void GpsInsLocalizerNl::insDataCb(
     const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
+    // Copy into modifiable object
     novatel_gps_msgs::Inspva inspva = *inspva_msg;
 
     if (this->msl_height)
     {
         if (this->received_undulation)
         {
-            inspva.height = inspva_msg->height + this->undulation;
+            inspva.height = inspva_msg->height - this->undulation;
         }
         else
         {
@@ -103,7 +104,7 @@ void GpsInsLocalizerNl::insDataCb(
     }
 
     // Get the pose of the base_link in the earth (ECEF) frame
-    tf2::Transform baselink_earth = calculateBaselinkPose(inspva_msg);
+    tf2::Transform baselink_earth = calculateBaselinkPose(inspva);
 
     // Pose of base_link in the map frame
     tf2::Transform baselink_map;
@@ -190,17 +191,17 @@ void GpsInsLocalizerNl::createMapFrame(novatel_gps_msgs::Inspva inspva_msg)
     this->map_frame_established = true;
 }
 
-tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
+tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(novatel_gps_msgs::Inspva inspva_msg)
 {
     // Get ENU TF of measured GPS coordinates
     tf2::Transform earth_gps_enu_tf = convertLLHtoECEF(
-        inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
+        inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height);
 
     // Orientation of the gps in the ENU frame
     tf2::Quaternion orientation_gpsm = convertAzimuthToENU(
-        inspva_msg->roll * M_PI / 180,
-        inspva_msg->pitch * M_PI / 180,
-        inspva_msg->azimuth * M_PI / 180);
+        inspva_msg.roll * M_PI / 180,
+        inspva_msg.pitch * M_PI / 180,
+        inspva_msg.azimuth * M_PI / 180);
 
     // Pose of the gps in the temporary measured gps ENU frame
     tf2::Transform tfpose_gpsm(orientation_gpsm);
@@ -214,7 +215,7 @@ tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::
     if (this->publish_earth_gpsm_tf)
     {
         geometry_msgs::TransformStamped earth_gpsm_tf;
-        earth_gpsm_tf.header.stamp = inspva_msg->header.stamp;
+        earth_gpsm_tf.header.stamp = inspva_msg.header.stamp;
         earth_gpsm_tf.header.frame_id = "earth";
         earth_gpsm_tf.child_frame_id = this->measured_gps_frame;
         tf2::convert(gpsm_earth, earth_gpsm_tf.transform);
