@@ -2,15 +2,15 @@ repositories:
   depends/autoware/common:
     type: git
     url: https://gitlab.com/astuff/autoware.ai/common.git
-    version: as/master
+    version: oap5
   depends/autoware/messages:
     type: git
     url: https://gitlab.com/astuff/autoware.ai/messages.git
-    version: as/master
+    version: oap5
   depends/autoware/utilities:
     type: git
     url: https://gitlab.com/astuff/autoware.ai/utilities.git
-    version: as/master
+    version: oap5
   depends/vendor/lanelet2:
     type: git
     url: https://github.com/fzi-forschungszentrum-informatik/Lanelet2.git
@@ -19,4 +19,3 @@ repositories:
     type: git
     url: https://github.com/KIT-MRT/mrt_cmake_modules.git
     version: 67a93bcfee4f7e9e39e79f138ecadbba5c8392b7
->>>>>>> as/master
