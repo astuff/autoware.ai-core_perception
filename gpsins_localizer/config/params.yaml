@@ -28,4 +28,4 @@ no_solution_init: false
 # WARNING: if the MGRS zone changes during operation, the localizer will freeze
 # in place, only use this mode if you are certain you will be operating in the
 # same MGRS zone throughout.
-mgrs_mode: false
+mgrs_mode: true

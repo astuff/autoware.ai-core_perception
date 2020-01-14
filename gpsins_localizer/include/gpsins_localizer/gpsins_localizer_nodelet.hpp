@@ -54,6 +54,8 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);
     tf2::Transform convertECEFtoMGRS(tf2::Transform pose, double roll, double pitch, double yaw);
+    tf2::Transform convertLLHto3301(double latitude, double longitude, double height, double roll, double pitch, double yaw);
+    tf2::Vector3 geo_lest(double latitude, double longitude, double height);
 
     // Nodehandles, both public and private
     ros::NodeHandle nh, pnh;

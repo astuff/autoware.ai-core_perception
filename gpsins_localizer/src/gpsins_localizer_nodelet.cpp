@@ -13,6 +13,7 @@
 #include <GeographicLib/Geocentric.hpp>
 #include <GeographicLib/UTMUPS.hpp>
 #include <GeographicLib/MGRS.hpp>
+#include <GeographicLib/LambertConformalConic.hpp>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -89,7 +90,14 @@ void GpsInsLocalizerNl::insDataCb(
     tf2::Transform baselink_map;
     if (this->mgrs_mode)
     {
-        baselink_map = convertECEFtoMGRS(baselink_earth,
+        // baselink_map = convertECEFtoMGRS(baselink_earth,
+        //     inspva_msg->roll * M_PI / 180,
+        //     inspva_msg->pitch * M_PI / 180,
+        //     inspva_msg->azimuth * M_PI / 180);
+        baselink_map = convertLLHto3301(
+            inspva_msg->latitude,
+            inspva_msg->longitude,
+            inspva_msg->height,
             inspva_msg->roll * M_PI / 180,
             inspva_msg->pitch * M_PI / 180,
             inspva_msg->azimuth * M_PI / 180);
@@ -357,6 +365,111 @@ tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double 
 
     this->prev_mgrs_pose = mgrs_pose;
     return mgrs_pose;
+}
+
+
+tf2::Vector3 GpsInsLocalizerNl::geo_lest(double latitude, double longitude, double height)
+{
+  double LAT = (latitude*(M_PI/180));
+  double LON = (longitude*(M_PI/180));
+  double a = 6378137.00;
+  double F = 298.257222100883;
+  double RF = F;
+  F = (1/F);
+  double B0 = ((57.00 + 31.00 / 60.00 + 3.194148 / 3600.0)*(M_PI/180));
+  double L0 = ((24.00)*(M_PI/180));
+  double FN = 6375000.0;
+  double FE = 500000.0;
+  double B1 = ((59.00 + 20.00 / 60.00)*(M_PI/180));
+  double B2 = ((58.00)*(M_PI/180));
+  double xx = (latitude - FN);
+  double yy = (longitude - FE);
+  double f1 = (1 / RF);
+  double er = ((2.00 * f1) - (f1 * f1));
+  double e = std::sqrt(er);
+  double t1 = std::sqrt(((1.00 - sin(B1)) / (1.00 + sin(B1))) * (pow(((1.00 + e * sin(B1)) / (1.00 - e * sin(B1))), e)));
+  double t2 = std::sqrt(((1.00 - sin(B2)) / (1.00 + sin(B2))) * (pow(((1.00 + e * sin(B2)) / (1.00 - e * sin(B2))), e)));
+  double t0 = std::sqrt(((1.00 - sin(B0)) / (1.00 + sin(B0))) * (pow(((1.00 + e * sin(B0)) / (1.00 - e * sin(B0))), e)));
+  double t = std::sqrt(((1.00 - sin(LAT)) / (1.00 + sin(LAT))) * (pow(((1.00 + e * sin(LAT)) / (1.00 - e * sin(LAT))), e)));
+  double m1 = (cos(B1) / (pow((1.00 - er * sin(B1) * sin(B1)), 0.5)));
+  double m2 = (cos(B2) / (pow((1.00 - er * sin(B2) * sin(B2)), 0.5)));
+  double n = ((std::log(m1) - std::log(m2)) / (std::log(t1) - std::log(t2)));
+  double FF = (m1 / (n * pow(t1, n)));
+  double p0 = (a * FF * (pow(t0, n)));
+  double FII = (n * (LON - L0));
+  double p = (a * FF * pow(t, n));
+  n = (p0 - (p * cos(FII)) + FN);
+  e = (p * sin(FII) + FE);
+
+  tf2::Vector3 output(n, e, height);
+  // tf2::Vector3 output();
+  return (output);
+}
+
+tf2::Transform GpsInsLocalizerNl::convertLLHto3301(double latitude, double longitude, double height, double roll, double pitch, double yaw)
+{
+    // Converts to the Estonian coordinate system (EPSG 3301)
+    // https://epsg.io/3301
+
+    // double radius = 6378137;
+    // double flattening = 1/298.257222101;
+    // double par1 = 59.33333333333334;
+    // double par2 = 58;
+    //
+    // double central_meridian = 24.0;
+    // double latitude_of_origin = 57.51755393055556;
+    //
+    // double false_easting = 500000.0;
+    // double false_northing = 6375000.0;
+    //
+    // double scale = 1;
+    //
+    //
+    // // double false_easting = 500000.0;
+    // // double false_northing = 0.0;
+    //
+    //
+    // GeographicLib::LambertConformalConic conic(
+    //     radius,
+    //     flattening,
+    //     par1,
+    //     par2,
+    //     scale
+    // );
+    //
+    //
+    //
+    // // const GeographicLib::LambertConformalConic conic(
+    // //     6378137.0,
+    // //     0.0033528106811836,
+    // //     latitude_of_origin,
+    // //     scale
+    // // );
+    //
+    // double dyn_easting, dyn_northing;
+    // conic.Forward(central_meridian, latitude_of_origin, central_meridian, dyn_easting, dyn_northing);
+    // dyn_easting -= false_easting;
+    // dyn_northing -= false_northing;
+    //
+    //
+    // double x, y;
+    // conic.Forward(central_meridian, latitude, longitude, x, y);
+    //
+    //
+    //
+    // // ROS_INFO("LAT: %f", conic.OriginLatitude());
+    //
+    tf2::Transform est_tf;
+    tf2::Vector3 origin = geo_lest(latitude, longitude, height);
+    // tf2::Vector3 origin(x - dyn_easting, y - dyn_northing, height);
+    // // tf2::Vector3 origin(x - false_easting, y - false_northing, height);
+    //
+    tf2::Quaternion orientation;
+    orientation.setRPY(roll, pitch, yaw);
+    est_tf.setRotation(orientation);
+    est_tf.setOrigin(origin);
+
+    return est_tf;
 }
 
 tf2::Quaternion GpsInsLocalizerNl::convertAzimuthToENU(double roll, double pitch, double yaw)
