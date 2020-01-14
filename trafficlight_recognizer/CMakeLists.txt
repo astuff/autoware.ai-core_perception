@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   geometry_msgs
   image_transport
+  lanelet2_extension
   libvectormap
   roscpp
   roslint
@@ -56,8 +57,6 @@ find_package(TinyXML REQUIRED)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${vector_map_INCLUDE_DIRS}
-  ${autoware_msgs_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
 )
 
@@ -84,6 +83,8 @@ catkin_package(
 
   DEPENDS TinyXML
 )
+
+
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
@@ -126,9 +127,9 @@ add_executable(
 
 target_link_libraries(
   region_tlr
-  libcontext
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
+  libcontext
   ${OPENGL_LIBRARIES}
 )
 
@@ -153,6 +154,21 @@ add_dependencies(
   feat_proj
   ${catkin_EXPORTED_TARGETS}
 )
+
+add_executable(feat_proj_lanelet2
+        nodes/feat_proj_lanelet2/feat_proj_lanelet2_core.cpp
+        nodes/feat_proj_lanelet2/feat_proj_lanelet2_node.cpp
+        )
+
+target_link_libraries(feat_proj_lanelet2
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
+        )
+
+add_dependencies(feat_proj_lanelet2
+        ${catkin_EXPORTED_TARGETS}
+        )
+
 
 ### tlr_tuner ###
 EXECUTE_PROCESS(
@@ -213,7 +229,12 @@ add_dependencies(
 )
 
 ### label_maker ###
+
+find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+find_package(TinyXML REQUIRED)
 
 file(GLOB SOURCES "nodes/label_maker/*.cpp")
 file(GLOB HEADERS "include/trafficlight_recognizer/label_maker/*.h")
@@ -244,7 +265,7 @@ target_link_libraries(
 )
 
 install(
-  TARGETS region_tlr feat_proj tlr_tuner roi_extractor label_maker libcontext tl_switch
+  TARGETS region_tlr feat_proj tlr_tuner feat_proj_lanelet2 roi_extractor label_maker libcontext tl_switch
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -406,4 +427,15 @@ endif ()
 
 if (CATKIN_ENABLE_TESTING)
   roslint_add_test()
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(test-feat_proj_lanelet2
+    test/test_feat_proj_lanelet2.test
+    test/src/test_feat_proj_lanelet2.cpp
+    nodes/feat_proj_lanelet2/feat_proj_lanelet2_core.cpp
+    )
+  add_dependencies(test-feat_proj_lanelet2 ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(test-feat_proj_lanelet2
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    )
 endif ()
