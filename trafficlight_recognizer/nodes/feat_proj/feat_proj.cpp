@@ -46,6 +46,8 @@ static constexpr uint32_t SUBSCRIBE_QUEUE_SIZE = 1000;
 
 static int adjust_proj_x = 0;
 static int adjust_proj_y = 0;
+static double near_plane_ = 0.0;
+static double far_plane_ = 0.0;
 
 typedef struct
 {
@@ -320,7 +322,6 @@ void echoSignals2(const ros::Publisher& pub, bool useOpenGLCoord = false)
     if (project2(signalcenter, &u, &v, useOpenGLCoord) == true)
     {
       countPoint++;
-      // std::cout << u << ", " << v << ", " << std::endl;
 
       int radius;
       int ux, vx;
@@ -354,7 +355,7 @@ void echoSignals2(const ros::Publisher& pub, bool useOpenGLCoord = false)
   signalsInFrame.header.stamp = ros::Time::now();
   pub.publish(signalsInFrame);
 
-  std::cout << "There are " << signalsInFrame.Signals.size() << " signals in range" << std::endl;
+  ROS_DEBUG("There are %lu signals in range", signalsInFrame.Signals.size());
 }
 
 void interrupt(int s)
@@ -370,6 +371,8 @@ int main(int argc, char* argv[])
   ros::NodeHandle private_nh("~");
   std::string cameraInfo_topic_name;
   private_nh.param<std::string>("camera_info_topic", cameraInfo_topic_name, "/camera_info");
+  private_nh.param<double>("roi_search_min_distance", near_plane_, 1.0);
+  private_nh.param<double>("roi_search_max_distance", far_plane_, 200.0);
 
   /* get camera ID */
   camera_id_str = cameraInfo_topic_name;
@@ -393,24 +396,19 @@ int main(int argc, char* argv[])
       rosnode.subscribe("vector_map_info/vector", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_vectors, &vmap);
   ros::Subscriber sub_signal =
       rosnode.subscribe("vector_map_info/signal", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_signals, &vmap);
-  ros::Subscriber sub_whiteline =
-      rosnode.subscribe("vector_map_info/white_line", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_whitelines, &vmap);
-  ros::Subscriber sub_dtlane =
-      rosnode.subscribe("vector_map_info/dtlane", SUBSCRIBE_QUEUE_SIZE, &VectorMap::load_dtlanes, &vmap);
 
   /* wait until loading all vector map is completed */
-  ros::Rate wait_rate(100);
-  std::cout << "Loading Vector Map. Please wait";
-  while (vmap.points.empty() || vmap.lines.empty() || vmap.whitelines.empty() || vmap.lanes.empty() ||
-         vmap.dtlanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
+  ros::Rate wait_rate(10);
+  while (vmap.points.empty() || vmap.lines.empty() || vmap.lanes.empty() || vmap.vectors.empty()
+    || vmap.signals.empty())
   {
     ros::spinOnce();
-    std::cout << ".";
+    ROS_INFO_THROTTLE(2, "Waiting for Vector Map");
     wait_rate.sleep();
   }
 
   vmap.loaded = true;
-  std::cout << "Loaded." << std::endl;
+  ROS_INFO("Vector Map loaded.");
 
   ros::Subscriber cameraInfoSubscriber = rosnode.subscribe(cameraInfo_topic_name, 100, cameraInfoCallback);
   ros::Subscriber cameraImage = rosnode.subscribe(cameraInfo_topic_name, 100, cameraInfoCallback);
