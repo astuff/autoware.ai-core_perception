@@ -401,7 +401,11 @@ tf2::Vector3 GpsInsLocalizerNl::geo_lest(double latitude, double longitude, doub
   n = (p0 - (p * cos(FII)) + FN);
   e = (p * sin(FII) + FE);
 
-  tf2::Vector3 output(n, e, height);
+
+  double x_offset = 650000; // easting
+  double y_offset = 6465000; // northing
+
+  tf2::Vector3 output(n - y_offset, e - x_offset, height);
   // tf2::Vector3 output();
   return (output);
 }
@@ -459,6 +463,8 @@ tf2::Transform GpsInsLocalizerNl::convertLLHto3301(double latitude, double longi
     //
     // // ROS_INFO("LAT: %f", conic.OriginLatitude());
     //
+
+
     tf2::Transform est_tf;
     tf2::Vector3 origin = geo_lest(latitude, longitude, height);
     // tf2::Vector3 origin(x - dyn_easting, y - dyn_northing, height);
