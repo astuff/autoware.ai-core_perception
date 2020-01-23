@@ -73,25 +73,22 @@ void GpsInsLocalizerNl::insDataCb(
     const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
-    // Copy into modifiable object
-    novatel_gps_msgs::Inspva inspva = *inspva_msg;
-
     // We don't need any static TFs for this function, so no need to wait
     // for init
     if (this->create_map_frame)
     {
-        createMapFrame(inspva);
+        createMapFrame(inspva_msg);
     }
 
     // Don't continue if uninitialized
-    checkInitialize(inspva.status);
+    checkInitialize(inspva_msg->status);
     if (!this->initialized)
     {
         return;
     }
 
     // Get the pose of the base_link in the earth (ECEF) frame
-    tf2::Transform baselink_earth = calculateBaselinkPose(inspva);
+    tf2::Transform baselink_earth = calculateBaselinkPose(inspva_msg);
 
     // Pose of base_link in the map frame
     tf2::Transform baselink_map;
@@ -106,9 +103,9 @@ void GpsInsLocalizerNl::insDataCb(
         }
 
         baselink_map = convertECEFtoMGRS(baselink_earth, height,
-            inspva.roll * M_PI / 180,
-            inspva.pitch * M_PI / 180,
-            inspva.azimuth * M_PI / 180);
+            inspva_msg->roll * M_PI / 180,
+            inspva_msg->pitch * M_PI / 180,
+            inspva_msg->azimuth * M_PI / 180);
     }
     else
     {
@@ -116,9 +113,9 @@ void GpsInsLocalizerNl::insDataCb(
     }
 
     // publish
-    broadcastTf(baselink_map, inspva.header.stamp);
-    publishPose(baselink_map, inspva.header.stamp);
-    pubishVelocity(inspva, imu_msg);
+    broadcastTf(baselink_map, inspva_msg->header.stamp);
+    publishPose(baselink_map, inspva_msg->header.stamp);
+    pubishVelocity(inspva_msg, imu_msg);
 }
 
 void GpsInsLocalizerNl::bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg)
@@ -147,17 +144,17 @@ void GpsInsLocalizerNl::publishPose(tf2::Transform pose, ros::Time stamp)
     this->pose_pub.publish(pose_stamped);
 }
 
-void GpsInsLocalizerNl::pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
+void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
     // GPS velocity
-    double n_vel = inspva_msg.north_velocity;
-    double e_vel = inspva_msg.east_velocity;
+    double n_vel = inspva_msg->north_velocity;
+    double e_vel = inspva_msg->east_velocity;
     double gps_velocity = sqrt(n_vel * n_vel + e_vel * e_vel);
 
     // Publish Twist in the base_link frame
     geometry_msgs::TwistStamped twist_bl;
-    twist_bl.header.stamp = inspva_msg.header.stamp;
+    twist_bl.header.stamp = inspva_msg->header.stamp;
     twist_bl.header.frame_id = "base_link";
     twist_bl.twist.linear.x = gps_velocity;
     twist_bl.twist.linear.y = 0.0;
@@ -168,13 +165,13 @@ void GpsInsLocalizerNl::pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
     this->velocity_pub.publish(twist_bl);
 }
 
-void GpsInsLocalizerNl::createMapFrame(novatel_gps_msgs::Inspva inspva_msg)
+void GpsInsLocalizerNl::createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
 {
     tf2::Transform new_earth_map_tf = convertLLHtoECEF(
-        inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height);
+        inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
 
     geometry_msgs::TransformStamped earth_map_tfs_msg;
-    earth_map_tfs_msg.header.stamp = inspva_msg.header.stamp;
+    earth_map_tfs_msg.header.stamp = inspva_msg->header.stamp;
     earth_map_tfs_msg.header.frame_id = "earth";
     earth_map_tfs_msg.child_frame_id = "map";
     tf2::convert(new_earth_map_tf, earth_map_tfs_msg.transform);
@@ -186,17 +183,17 @@ void GpsInsLocalizerNl::createMapFrame(novatel_gps_msgs::Inspva inspva_msg)
     this->map_frame_established = true;
 }
 
-tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(novatel_gps_msgs::Inspva inspva_msg)
+tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
 {
     // Get ENU TF of measured GPS coordinates
     tf2::Transform earth_gps_enu_tf = convertLLHtoECEF(
-        inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height);
+        inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
 
     // Orientation of the gps in the ENU frame
     tf2::Quaternion orientation_gpsm = convertAzimuthToENU(
-        inspva_msg.roll * M_PI / 180,
-        inspva_msg.pitch * M_PI / 180,
-        inspva_msg.azimuth * M_PI / 180);
+        inspva_msg->roll * M_PI / 180,
+        inspva_msg->pitch * M_PI / 180,
+        inspva_msg->azimuth * M_PI / 180);
 
     // Pose of the gps in the temporary measured gps ENU frame
     tf2::Transform tfpose_gpsm(orientation_gpsm);
@@ -210,7 +207,7 @@ tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(novatel_gps_msgs::Inspva
     if (this->publish_earth_gpsm_tf)
     {
         geometry_msgs::TransformStamped earth_gpsm_tf;
-        earth_gpsm_tf.header.stamp = inspva_msg.header.stamp;
+        earth_gpsm_tf.header.stamp = inspva_msg->header.stamp;
         earth_gpsm_tf.header.frame_id = "earth";
         earth_gpsm_tf.child_frame_id = this->measured_gps_frame;
         tf2::convert(gpsm_earth, earth_gpsm_tf.transform);

@@ -48,10 +48,10 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     // Util functions
     void broadcastTf(tf2::Transform transform, ros::Time stamp);
     void publishPose(tf2::Transform pose, ros::Time stamp);
-    void pubishVelocity(novatel_gps_msgs::Inspva inspva_msg,
+    void pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
-    void createMapFrame(novatel_gps_msgs::Inspva inspva_msg);
-    tf2::Transform calculateBaselinkPose(novatel_gps_msgs::Inspva inspva_msg);
+    void createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
+    tf2::Transform calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
     void checkInitialize(std::string ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);

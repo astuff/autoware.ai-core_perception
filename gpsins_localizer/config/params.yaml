@@ -22,6 +22,7 @@ static_gps_frame: imu
 no_solution_init: false
 
 # Enable to use height above mean sea level instead of height above WGS84 ellipsoid
+# Only works when mgrs_mode is true
 msl_height: false
 
 # MGRS mode is a simplified opertating mode that doesn't use ECEF and simply
