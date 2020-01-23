@@ -55,7 +55,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     void checkInitialize(std::string ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);
-    tf2::Transform convertECEFtoMGRS(tf2::Transform pose, double roll, double pitch, double yaw);
+    tf2::Transform convertECEFtoMGRS(tf2::Transform pose, double height, double roll, double pitch, double yaw);
 
     // Nodehandles, both public and private
     ros::NodeHandle nh, pnh;
@@ -82,10 +82,10 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     bool initialized = false;
     bool map_frame_established = false;
     bool gps_frame_established = false;
+    bool received_undulation = false;
     std::string mgrs_zone = "";
     tf2::Transform prev_mgrs_pose;
     bool mgrs_pose_frozen = false;
-    bool received_undulation = false;
     float undulation = 0.0;
 
     // Parameters
