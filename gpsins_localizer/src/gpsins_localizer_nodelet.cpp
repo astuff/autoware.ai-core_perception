@@ -80,7 +80,7 @@ void GpsInsLocalizerNl::insDataCb(
     {
         if (this->received_undulation)
         {
-            inspva.height = inspva_msg->height - this->undulation;
+            inspva.height = inspva.height - this->undulation;
         }
         else
         {
