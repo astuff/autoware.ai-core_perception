@@ -23,7 +23,7 @@ This topic is used to calculate vehicle Pose in the map frame, as well as a forw
 This topic is used to populate the angular velocities of the vehicle state.
 - `bestpos` ([novatel_gps_msgs/NovatelPosition](https://github.com/swri-robotics/novatel_gps_driver/blob/master/novatel_gps_msgs/msg/NovatelPosition.msg))
 This topic is only used if both the `msl_height` and `mgrs_mode` parameters are true.
-It is used to recieve undulation data for height calculations.
+It is used to receive undulation data for height calculations.
 
 #### Pubs
 
