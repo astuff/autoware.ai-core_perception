@@ -37,9 +37,13 @@ void GpsInsLocalizerNl::onInit()
     // Subscribers
     this->inspva_sub.subscribe(this->nh, this->ins_data_topic_name, 10);
     this->imu_sub.subscribe(this->nh, this->imu_data_topic_name, 10);
-
     this->sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10), this->inspva_sub, this->imu_sub);
     this->sync->registerCallback(boost::bind(&GpsInsLocalizerNl::insDataCb, this, _1, _2));
+
+    if (this->msl_height && this->mgrs_mode)
+    {
+        this->bestpos_sub = nh.subscribe("gps/bestpos", 1, &GpsInsLocalizerNl::bestposCb, this);
+    }
 }
 
 void GpsInsLocalizerNl::loadParams()
@@ -51,6 +55,7 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
     this->pnh.param("no_solution_init", this->no_solution_init, false);
+    this->pnh.param("msl_height", this->msl_height, false);
     this->pnh.param("mgrs_mode", this->mgrs_mode, false);
 
     // Simplified MGRS mode
@@ -89,7 +94,15 @@ void GpsInsLocalizerNl::insDataCb(
     tf2::Transform baselink_map;
     if (this->mgrs_mode)
     {
-        baselink_map = convertECEFtoMGRS(baselink_earth,
+        // WGS84 height
+        double height = inspva_msg->height;
+        if (this->msl_height)
+        {
+            // Mean sea level height
+            height = height - this->undulation;
+        }
+
+        baselink_map = convertECEFtoMGRS(baselink_earth, height,
             inspva_msg->roll * M_PI / 180,
             inspva_msg->pitch * M_PI / 180,
             inspva_msg->azimuth * M_PI / 180);
@@ -103,6 +116,12 @@ void GpsInsLocalizerNl::insDataCb(
     broadcastTf(baselink_map, inspva_msg->header.stamp);
     publishPose(baselink_map, inspva_msg->header.stamp);
     pubishVelocity(inspva_msg, imu_msg);
+}
+
+void GpsInsLocalizerNl::bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg)
+{
+    this->undulation = bestpos_msg->undulation;
+    this->received_undulation = true;
 }
 
 void GpsInsLocalizerNl::broadcastTf(tf2::Transform transform, ros::Time stamp)
@@ -243,6 +262,16 @@ void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
         this->gps_frame_established = true;
     }
 
+    // Check if we are getting undulation data
+    if (this->mgrs_mode && this->msl_height)
+    {
+        if (!this->received_undulation)
+        {
+            ROS_WARN_THROTTLE(2, "Waiting for bestpos message");
+            return;
+        }
+    }
+
     // Then check if we can initialize
     if (this->map_frame_established && this->gps_frame_established)
     {
@@ -312,13 +341,13 @@ tf2::Transform GpsInsLocalizerNl::convertLLHtoECEF(double latitude, double longi
     return ecef_enu_tf;
 }
 
-tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double roll, double pitch, double yaw)
+tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double height, double roll, double pitch, double yaw)
 {
     GeographicLib::Geocentric earth = GeographicLib::Geocentric::WGS84();
 
     // Convert ECEF to LLA
-    double latitude, longitude, height;
-    earth.Reverse(pose.getOrigin()[0], pose.getOrigin()[1], pose.getOrigin()[2], latitude, longitude, height);
+    double latitude, longitude, height_unused;
+    earth.Reverse(pose.getOrigin()[0], pose.getOrigin()[1], pose.getOrigin()[2], latitude, longitude, height_unused);
 
     // Convert LLA to UTM, then to MGRS
     int utm_zone;
