@@ -896,13 +896,13 @@ int main(int argc, char** argv)
 
   if (!nh.getParam("tf_baselink2primarylidar", _tf_baselink2primarylidar))
   {
-    std::cout << "baselink to localizer transform is not set." << std::endl;
+    std::cout << "baselink to primary lidar transform is not set." << std::endl;
     return 1;
   }
 
   // translation x, y, z, yaw, pitch, and roll
   if (_tf_baselink2primarylidar.size() != 6) {
-    std::cout << "baselink to localizer transform is not valid." << std::endl;
+    std::cout << "baselink to primary lidar transform is not valid." << std::endl;
     return 1;
   }
 
