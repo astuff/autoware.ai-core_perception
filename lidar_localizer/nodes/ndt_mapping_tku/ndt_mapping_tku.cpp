@@ -69,7 +69,7 @@ int g_map_update = 1;
 double g_ini_x, g_ini_y, g_ini_z, g_ini_roll, g_ini_pitch, g_ini_yaw;
 
 static float _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
-static std::vector<float> _tf_baselink2localizer;
+static std::vector<float> _tf_baselink2primarylidar;
 static Eigen::Matrix4f tf_btol, tf_ltob;  // tf between base_link and localizer
 static tf::Quaternion q_local_to_global;
 static Eigen::Matrix4f tf_local_to_global;
@@ -484,24 +484,24 @@ int main(int argc, char *argv[])
   private_nh.getParam("init_pitch", g_ini_pitch);
   private_nh.getParam("init_yaw", g_ini_yaw);
 
-  if (!nh.getParam("tf_baselink2localizer", _tf_baselink2localizer))
+  if (!nh.getParam("tf_baselink2primarylidar", _tf_baselink2primarylidar))
   {
     std::cout << "baselink to localizer transform is not set." << std::endl;
     return 1;
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2localizer.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6) {
     std::cout << "baselink to localizer transform is not valid." << std::endl;
     return 1;
   }
 
-  _tf_x = _tf_baselink2localizer[0];
-  _tf_y = _tf_baselink2localizer[1];
-  _tf_z = _tf_baselink2localizer[2];
-  _tf_yaw = _tf_baselink2localizer[3];
-  _tf_pitch = _tf_baselink2localizer[4];
-  _tf_roll = _tf_baselink2localizer[5];
+  _tf_x = _tf_baselink2primarylidar[0];
+  _tf_y = _tf_baselink2primarylidar[1];
+  _tf_z = _tf_baselink2primarylidar[2];
+  _tf_yaw = _tf_baselink2primarylidar[3];
+  _tf_pitch = _tf_baselink2primarylidar[4];
+  _tf_roll = _tf_baselink2primarylidar[5];
 
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation

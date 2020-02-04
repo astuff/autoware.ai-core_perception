@@ -141,7 +141,7 @@ static double max_scan_range = 200.0;
 static double min_add_scan_shift = 1.0;
 
 static float _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
-static std::vector<float> _tf_baselink2localizer;
+static std::vector<float> _tf_baselink2primarylidar;
 static Eigen::Matrix4f tf_btol, tf_ltob;
 
 static bool _use_imu = false;
@@ -977,24 +977,24 @@ int main(int argc, char** argv)
   std::cout << "imu_topic: " << _imu_topic << std::endl;
   std::cout << "incremental_voxel_update: " << _incremental_voxel_update << std::endl;
 
-  if (!nh.getParam("tf_baselink2localizer", _tf_baselink2localizer))
+  if (!nh.getParam("tf_baselink2primarylidar", _tf_baselink2primarylidar))
   {
     std::cout << "baselink to localizer transform is not set." << std::endl;
     return 1;
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2localizer.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6) {
     std::cout << "baselink to localizer transform is not valid." << std::endl;
     return 1;
   }
 
-  _tf_x = _tf_baselink2localizer[0];
-  _tf_y = _tf_baselink2localizer[1];
-  _tf_z = _tf_baselink2localizer[2];
-  _tf_yaw = _tf_baselink2localizer[3];
-  _tf_pitch = _tf_baselink2localizer[4];
-  _tf_roll = _tf_baselink2localizer[5];
+  _tf_x = _tf_baselink2primarylidar[0];
+  _tf_y = _tf_baselink2primarylidar[1];
+  _tf_z = _tf_baselink2primarylidar[2];
+  _tf_yaw = _tf_baselink2primarylidar[3];
+  _tf_pitch = _tf_baselink2primarylidar[4];
+  _tf_roll = _tf_baselink2primarylidar[5];
 
   std::cout << "(tf_x,tf_y,tf_z,tf_roll,tf_pitch,tf_yaw): (" << _tf_x << ", " << _tf_y << ", " << _tf_z << ", "
             << _tf_roll << ", " << _tf_pitch << ", " << _tf_yaw << ")" << std::endl;

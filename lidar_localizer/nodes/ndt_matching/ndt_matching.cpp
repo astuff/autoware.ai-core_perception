@@ -210,7 +210,7 @@ static autoware_msgs::NDTStat ndt_stat_msg;
 static double predict_pose_error = 0.0;
 
 static float _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
-static std::vector<float> _tf_baselink2localizer;
+static std::vector<float> _tf_baselink2primarylidar;
 static Eigen::Matrix4f tf_btol;
 
 static std::string _localizer = "velodyne";
@@ -1573,24 +1573,24 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  if (!nh.getParam("tf_baselink2localizer", _tf_baselink2localizer))
+  if (!nh.getParam("tf_baselink2primarylidar", _tf_baselink2primarylidar))
   {
     std::cout << "baselink to localizer transform is not set." << std::endl;
     return 1;
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2localizer.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6) {
     std::cout << "baselink to localizer transform is not valid." << std::endl;
     return 1;
   }
 
-  _tf_x = _tf_baselink2localizer[0];
-  _tf_y = _tf_baselink2localizer[1];
-  _tf_z = _tf_baselink2localizer[2];
-  _tf_yaw = _tf_baselink2localizer[3];
-  _tf_pitch = _tf_baselink2localizer[4];
-  _tf_roll = _tf_baselink2localizer[5];
+  _tf_x = _tf_baselink2primarylidar[0];
+  _tf_y = _tf_baselink2primarylidar[1];
+  _tf_z = _tf_baselink2primarylidar[2];
+  _tf_yaw = _tf_baselink2primarylidar[3];
+  _tf_pitch = _tf_baselink2primarylidar[4];
+  _tf_roll = _tf_baselink2primarylidar[5];
 
   std::cout << "-----------------------------------------------------------------" << std::endl;
   std::cout << "Log file: " << filename << std::endl;
