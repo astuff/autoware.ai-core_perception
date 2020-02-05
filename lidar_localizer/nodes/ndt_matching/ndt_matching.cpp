@@ -1572,12 +1572,13 @@ int main(int argc, char** argv)
   tf::StampedTransform tf_baselink2primarylidar;
   try
   {
-    tf_listener.lookupTransform(lidar_frame, "baselink", ros::Time(0), tf_baselink2primarylidar);
+    tf_listener.waitForTransform("base_link", lidar_frame, ros::Time(), ros::Duration(1.0));
+    tf_listener.lookupTransform("base_link", lidar_frame, ros::Time(), tf_baselink2primarylidar);
   }
   catch (tf::TransformException& ex)
   {
-    ROS_WARN("%s", ex.what());
-
+    ROS_WARN("Query base_link to primary lidar frame through TF tree failed: %s", ex.what());
+    
     // fall back to ros parameter for the transform
     std::vector<double> bl2pl_vec;
     if (!nh.getParam("tf_baselink2primarylidar", bl2pl_vec))
@@ -1592,6 +1593,7 @@ int main(int argc, char** argv)
       std::cout << "ros parameter tf_baselink2primarylidar is not valid." << std::endl;
       return 1;
     }
+    ROS_WARN("Query through ros parameter tf_baselink2primarylidar succeeded.");
 
     tf::Vector3 trans(bl2pl_vec[0], bl2pl_vec[1], bl2pl_vec[2]);
     tf::Quaternion quat;
