@@ -70,7 +70,7 @@ void GpsInsLocalizerNl::loadParams()
 }
 
 void GpsInsLocalizerNl::insDataCb(
-    const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+    const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
     // We don't need any static TFs for this function, so no need to wait
@@ -118,7 +118,7 @@ void GpsInsLocalizerNl::insDataCb(
     pubishVelocity(inspva_msg, imu_msg);
 }
 
-void GpsInsLocalizerNl::bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg)
+void GpsInsLocalizerNl::bestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg)
 {
     this->undulation = bestpos_msg->undulation;
     this->received_undulation = true;
@@ -144,7 +144,7 @@ void GpsInsLocalizerNl::publishPose(tf2::Transform pose, ros::Time stamp)
     this->pose_pub.publish(pose_stamped);
 }
 
-void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+void GpsInsLocalizerNl::pubishVelocity(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
     // GPS velocity
@@ -165,7 +165,7 @@ void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr&
     this->velocity_pub.publish(twist_bl);
 }
 
-void GpsInsLocalizerNl::createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
+void GpsInsLocalizerNl::createMapFrame(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg)
 {
     tf2::Transform new_earth_map_tf = convertLLHtoECEF(
         inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
@@ -183,7 +183,7 @@ void GpsInsLocalizerNl::createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr&
     this->map_frame_established = true;
 }
 
-tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
+tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg)
 {
     // Get ENU TF of measured GPS coordinates
     tf2::Transform earth_gps_enu_tf = convertLLHtoECEF(
@@ -217,7 +217,7 @@ tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::
     return baselink_earth;
 }
 
-void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
+void GpsInsLocalizerNl::checkInitialize(uint8_t ins_status)
 {
     if (this->initialized)
     {
@@ -277,11 +277,11 @@ void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
     {
         bool ins_alignment_complete = false;
         bool ins_solution_good = false;
-        if (ins_status == "INS_ALIGNMENT_COMPLETE")
+        if (ins_status == INS_ALIGNMENT_COMPLETE)
         {
             ins_alignment_complete = true;
         }
-        if (ins_status == "INS_SOLUTION_GOOD")
+        if (ins_status == INS_SOLUTION_GOOD)
         {
             ins_alignment_complete = true;
             ins_solution_good = true;

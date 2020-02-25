@@ -21,13 +21,16 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <novatel_gps_msgs/Inspva.h>
-#include <novatel_gps_msgs/NovatelPosition.h>
+#include <novatel_oem7_msgs/INSPVA.h>
+#include <novatel_oem7_msgs/BESTPOS.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Point.h>
 
-typedef message_filters::sync_policies::ApproximateTime<novatel_gps_msgs::Inspva, sensor_msgs::Imu> MySyncPolicy;
+const uint8_t INS_ALIGNMENT_COMPLETE = 7;
+const uint8_t INS_SOLUTION_GOOD = 3;
+
+typedef message_filters::sync_policies::ApproximateTime<novatel_oem7_msgs::INSPVA, sensor_msgs::Imu> MySyncPolicy;
 
 namespace gpsins_localizer {
 
@@ -41,18 +44,18 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     void loadParams();
 
     // Subscriber callbacks
-    void insDataCb(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+    void insDataCb(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
-    void bestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg);
+    void bestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg);
 
     // Util functions
     void broadcastTf(tf2::Transform transform, ros::Time stamp);
     void publishPose(tf2::Transform pose, ros::Time stamp);
-    void pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+    void pubishVelocity(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
-    void createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
-    tf2::Transform calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
-    void checkInitialize(std::string ins_status);
+    void createMapFrame(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg);
+    tf2::Transform calculateBaselinkPose(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg);
+    void checkInitialize(uint8_t ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);
     tf2::Transform convertECEFtoMGRS(tf2::Transform pose, double height, double roll, double pitch, double yaw);
@@ -68,7 +71,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
 
     // Subscribers
     ros::Subscriber bestpos_sub;
-    message_filters::Subscriber<novatel_gps_msgs::Inspva> inspva_sub;
+    message_filters::Subscriber<novatel_oem7_msgs::INSPVA> inspva_sub;
     message_filters::Subscriber<sensor_msgs::Imu> imu_sub;
     message_filters::Synchronizer<MySyncPolicy>* sync;
     tf2_ros::Buffer tf_buffer;
