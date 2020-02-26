@@ -60,7 +60,8 @@ void LidarFakePerception::run()
 
 void LidarFakePerception::objectInitialPoseCallback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-  global_frame_ = msg->header.frame_id;
+  // global_frame_ = msg->header.frame_id;
+  global_frame_ = "base_link";
   fake_object_initial_time_ = msg->header.stamp;
 
   tf::poseMsgToTF(msg->pose, fake_object_pose_);
@@ -232,8 +233,8 @@ void LidarFakePerception::publishFakes()
 
   if (fake_points_.size() != 0)  // publish empty
   {
-    fake_points_.header.frame_id = pointcloud_frame_;
     fake_points_.header = pcl_conversions::toPCL(fake_object_.header);
+    fake_points_.header.frame_id = pointcloud_frame_;
   }
 
   if (publish_objects_)
