@@ -159,8 +159,6 @@ bool FeatProjLanelet2::project2(const Eigen::Vector3f& pt, int* u, int* v, const
     ROS_ERROR_STREAM(__FUNCTION__ << ": u or v is null pointer!");
     return false;
   }
-  float nearPlane = 1.0;
-  float farPlane = 200.0;
 
   Eigen::Vector3f transformed_pt = transform(pt, camera_to_map_tf_);
 
@@ -467,6 +465,8 @@ void FeatProjLanelet2::init()
   roi_sign_pub_ = rosnode_.advertise<autoware_msgs::Signals>("roi_signal", 100);
 
   private_nh_.param<bool>("use_path_info", use_path_info_, false);
+  private_nh_.param<float>("roi_search_min_distance", nearPlane, 1.0);
+  private_nh_.param<float>("roi_search_max_distance", farPlane, 200.0);
 
   waypoint_subscriber_ = rosnode_.subscribe("final_waypoints", 1, &FeatProjLanelet2::waypointsCallback, this);
 
