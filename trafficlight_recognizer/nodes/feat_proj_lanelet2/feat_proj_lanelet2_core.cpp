@@ -167,8 +167,8 @@ bool FeatProjLanelet2::project2(const Eigen::Vector3f& pt, int* u, int* v, const
 
   *u = static_cast<int>(_u);
   *v = static_cast<int>(_v);
-  if (*u < 0 || image_width_ < *u || *v < 0 || image_height_ < *v || transformed_pt.z() < nearPlane ||
-      farPlane < transformed_pt.z())
+  if (*u < 0 || image_width_ < *u || *v < 0 || image_height_ < *v || transformed_pt.z() < near_plane_ ||
+      far_plane_ < transformed_pt.z())
   {
     *u = -1, *v = -1;
     return false;
@@ -465,8 +465,8 @@ void FeatProjLanelet2::init()
   roi_sign_pub_ = rosnode_.advertise<autoware_msgs::Signals>("roi_signal", 100);
 
   private_nh_.param<bool>("use_path_info", use_path_info_, false);
-  private_nh_.param<float>("roi_search_min_distance", nearPlane, 1.0);
-  private_nh_.param<float>("roi_search_max_distance", farPlane, 200.0);
+  private_nh_.param<float>("roi_search_min_distance", near_plane_, 1.0);
+  private_nh_.param<float>("roi_search_max_distance", far_plane_, 200.0);
 
   waypoint_subscriber_ = rosnode_.subscribe("final_waypoints", 1, &FeatProjLanelet2::waypointsCallback, this);
 
