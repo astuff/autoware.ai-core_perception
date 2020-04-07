@@ -91,6 +91,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     // Parameters
     std::string imu_data_topic_name = "gps/imu";
     std::string ins_data_topic_name = "gps/inspva";
+    bool broadcast_tfs = true;
     bool create_map_frame = false;
     bool publish_earth_gpsm_tf = false;
     std::string measured_gps_frame = "gps_measured";
