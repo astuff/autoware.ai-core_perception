@@ -50,6 +50,7 @@ void GpsInsLocalizerNl::loadParams()
 {
     this->pnh.param<std::string>("imu_data_topic_name", this->imu_data_topic_name, "gps/imu");
     this->pnh.param<std::string>("ins_data_topic_name", this->ins_data_topic_name, "gps/inspva");
+    this->pnh.param("broadcast_tfs", this->broadcast_tfs, true);
     this->pnh.param("create_map_frame", this->create_map_frame, false);
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
@@ -64,6 +65,13 @@ void GpsInsLocalizerNl::loadParams()
         this->create_map_frame = false;
         this->publish_earth_gpsm_tf = false;
         this->map_frame_established = true;
+    }
+
+    // Disable TF broadcasting
+    if (!this->broadcast_tfs)
+    {
+        this->create_map_frame = false;
+        this->publish_earth_gpsm_tf = false;
     }
 
     ROS_INFO("Parameters Loaded");
@@ -112,8 +120,11 @@ void GpsInsLocalizerNl::insDataCb(
         baselink_map = earth_map_tf * baselink_earth;
     }
 
-    // publish
-    broadcastTf(baselink_map, inspva_msg->header.stamp);
+    // Publish
+    if (this->broadcast_tfs)
+    {
+        broadcastTf(baselink_map, inspva_msg->header.stamp);
+    }
     publishPose(baselink_map, inspva_msg->header.stamp);
     pubishVelocity(inspva_msg, imu_msg);
 }
