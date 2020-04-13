@@ -81,7 +81,7 @@ void GpsInsLocalizerNl::insDataCb(
     }
 
     // Don't continue if uninitialized
-    checkInitialize(inspva_msg->status);
+    checkInitialize(inspva_msg->status.status);
     if (!this->initialized)
     {
         return;
@@ -217,7 +217,7 @@ tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_oem7_msgs:
     return baselink_earth;
 }
 
-void GpsInsLocalizerNl::checkInitialize(uint8_t ins_status)
+void GpsInsLocalizerNl::checkInitialize(uint32_t ins_status)
 {
     if (this->initialized)
     {
