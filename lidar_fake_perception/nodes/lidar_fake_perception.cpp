@@ -60,8 +60,7 @@ void LidarFakePerception::run()
 
 void LidarFakePerception::objectInitialPoseCallback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-  // global_frame_ = msg->header.frame_id;
-  global_frame_ = "base_link";
+  global_frame_ = msg->header.frame_id;
   fake_object_initial_time_ = msg->header.stamp;
 
   tf::poseMsgToTF(msg->pose, fake_object_pose_);
