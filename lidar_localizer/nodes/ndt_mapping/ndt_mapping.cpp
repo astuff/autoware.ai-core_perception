@@ -38,6 +38,8 @@
 
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
+#include <tf_conversions/tf_eigen.h>
 
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
@@ -140,7 +142,6 @@ static double min_scan_range = 5.0;
 static double max_scan_range = 200.0;
 static double min_add_scan_shift = 1.0;
 
-static double _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
 static Eigen::Matrix4f tf_btol, tf_ltob;
 
 static bool _use_imu = false;
@@ -368,10 +369,15 @@ static double calcDiffForRadian(const double lhs_rad, const double rhs_rad)
 }
 static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
 {
-  // std::cout << __func__ << std::endl;
-
   odom = *input;
   odom_calc(input->header.stamp);
+}
+
+static void vehicle_twist_callback(const geometry_msgs::TwistStampedConstPtr& msg)
+{
+  odom.header = msg->header;
+  odom.twist.twist = msg->twist;
+  odom_calc(odom.header.stamp);
 }
 
 static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
@@ -971,39 +977,47 @@ int main(int argc, char** argv)
   std::cout << "imu_topic: " << _imu_topic << std::endl;
   std::cout << "incremental_voxel_update: " << _incremental_voxel_update << std::endl;
 
-  if (nh.getParam("tf_x", _tf_x) == false)
+  std::string lidar_frame;
+  nh.param("localizer", lidar_frame, std::string("lidar"));
+  tf::TransformListener tf_listener;
+  tf::StampedTransform tf_baselink2primarylidar;
+  try
   {
-    std::cout << "tf_x is not set." << std::endl;
-    return 1;
+    tf_listener.waitForTransform("base_link", lidar_frame, ros::Time(), ros::Duration(1.0));
+    tf_listener.lookupTransform("base_link", lidar_frame, ros::Time(), tf_baselink2primarylidar);
   }
-  if (nh.getParam("tf_y", _tf_y) == false)
+  catch (tf::TransformException& ex)
   {
-    std::cout << "tf_y is not set." << std::endl;
-    return 1;
-  }
-  if (nh.getParam("tf_z", _tf_z) == false)
-  {
-    std::cout << "tf_z is not set." << std::endl;
-    return 1;
-  }
-  if (nh.getParam("tf_roll", _tf_roll) == false)
-  {
-    std::cout << "tf_roll is not set." << std::endl;
-    return 1;
-  }
-  if (nh.getParam("tf_pitch", _tf_pitch) == false)
-  {
-    std::cout << "tf_pitch is not set." << std::endl;
-    return 1;
-  }
-  if (nh.getParam("tf_yaw", _tf_yaw) == false)
-  {
-    std::cout << "tf_yaw is not set." << std::endl;
-    return 1;
-  }
+    ROS_WARN("Query base_link to primary lidar frame through TF tree failed: %s", ex.what());
 
-  std::cout << "(tf_x,tf_y,tf_z,tf_roll,tf_pitch,tf_yaw): (" << _tf_x << ", " << _tf_y << ", " << _tf_z << ", "
-            << _tf_roll << ", " << _tf_pitch << ", " << _tf_yaw << ")" << std::endl;
+    // fall back to ros parameter for the transform
+    std::vector<double> bl2pl_vec;
+    if (!nh.getParam("tf_baselink2primarylidar", bl2pl_vec))
+    {
+      std::cout << "ros parameter tf_baselink2primarylidar is not set." << std::endl;
+      return 1;
+    }
+
+    // translation x, y, z, yaw, pitch, and roll
+    if (bl2pl_vec.size() != 6)
+    {
+      std::cout << "ros parameter tf_baselink2primarylidar is not valid." << std::endl;
+      return 1;
+    }
+    ROS_WARN("Query through ros parameter tf_baselink2primarylidar succeeded.");
+
+    tf::Vector3 trans(bl2pl_vec[0], bl2pl_vec[1], bl2pl_vec[2]);
+    tf::Quaternion quat;
+    quat.setRPY(bl2pl_vec[5], bl2pl_vec[4], bl2pl_vec[3]);
+    tf_baselink2primarylidar.setOrigin(trans);
+    tf_baselink2primarylidar.setRotation(quat);
+  }
+  Eigen::Affine3d tf_affine;
+  tf::transformTFToEigen(tf_baselink2primarylidar, tf_affine);
+  tf_btol = tf_affine.matrix().cast<float>();
+  tf_ltob = tf_btol.inverse();
+
+  std::cout << "tf_baselink2primarylidar: \n" << tf_btol << std::endl;
 
 #ifndef CUDA_FOUND
   if (_method_type == MethodType::PCL_ANH_GPU)
@@ -1024,13 +1038,6 @@ int main(int argc, char** argv)
   }
 #endif
 
-  Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
-  Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
-  Eigen::AngleAxisf rot_y_btol(_tf_pitch, Eigen::Vector3f::UnitY());
-  Eigen::AngleAxisf rot_z_btol(_tf_yaw, Eigen::Vector3f::UnitZ());
-  tf_btol = (tl_btol * rot_z_btol * rot_y_btol * rot_x_btol).matrix();
-  tf_ltob = tf_btol.inverse();
-
   map.header.frame_id = "map";
 
   ndt_map_pub = nh.advertise<sensor_msgs::PointCloud2>("/ndt_map", 1000);
@@ -1039,8 +1046,9 @@ int main(int argc, char** argv)
   ros::Subscriber param_sub = nh.subscribe("config/ndt_mapping", 10, param_callback);
   ros::Subscriber output_sub = nh.subscribe("config/ndt_mapping_output", 10, output_callback);
   ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
-  ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", 100000, odom_callback);
+  ros::Subscriber odom_sub = nh.subscribe("vehicle/odom", 100000, odom_callback);
   ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
+  ros::Subscriber twist_sub = nh.subscribe("vehicle/twist", 100000, vehicle_twist_callback);
 
   ros::spin();
 
