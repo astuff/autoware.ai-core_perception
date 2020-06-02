@@ -2,7 +2,7 @@
 imu_data_topic_name: gps/imu
 
 # Topic name for inspva data
-ins_data_topic_name: gps/inspva
+ins_data_topic_name: novatel/oem7/inspva
 
 # Enable broadcasting of ROS transforms
 broadcast_tfs: true

@@ -42,14 +42,14 @@ void GpsInsLocalizerNl::onInit()
 
     if (this->msl_height && this->mgrs_mode)
     {
-        this->bestpos_sub = nh.subscribe("gps/bestpos", 1, &GpsInsLocalizerNl::bestposCb, this);
+        this->bestpos_sub = nh.subscribe("novatel/oem7/bestpos", 1, &GpsInsLocalizerNl::bestposCb, this);
     }
 }
 
 void GpsInsLocalizerNl::loadParams()
 {
     this->pnh.param<std::string>("imu_data_topic_name", this->imu_data_topic_name, "gps/imu");
-    this->pnh.param<std::string>("ins_data_topic_name", this->ins_data_topic_name, "gps/inspva");
+    this->pnh.param<std::string>("ins_data_topic_name", this->ins_data_topic_name, "novatel/oem7/inspva");
     this->pnh.param("broadcast_tfs", this->broadcast_tfs, true);
     this->pnh.param("create_map_frame", this->create_map_frame, false);
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
