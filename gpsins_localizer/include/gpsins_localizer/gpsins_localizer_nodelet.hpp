@@ -23,12 +23,10 @@
 
 #include <novatel_oem7_msgs/INSPVA.h>
 #include <novatel_oem7_msgs/BESTPOS.h>
+#include <novatel_oem7_msgs/InertialSolutionStatus.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Point.h>
-
-const uint8_t INS_ALIGNMENT_COMPLETE = 7;
-const uint8_t INS_SOLUTION_GOOD = 3;
 
 typedef message_filters::sync_policies::ApproximateTime<novatel_oem7_msgs::INSPVA, sensor_msgs::Imu> MySyncPolicy;
 

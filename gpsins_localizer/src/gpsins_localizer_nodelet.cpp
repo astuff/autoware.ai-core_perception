@@ -288,11 +288,11 @@ void GpsInsLocalizerNl::checkInitialize(uint32_t ins_status)
     {
         bool ins_alignment_complete = false;
         bool ins_solution_good = false;
-        if (ins_status == INS_ALIGNMENT_COMPLETE)
+        if (ins_status == novatel_oem7_msgs::InertialSolutionStatus::INS_ALIGNMENT_COMPLETE)
         {
             ins_alignment_complete = true;
         }
-        if (ins_status == INS_SOLUTION_GOOD)
+        if (ins_status == novatel_oem7_msgs::InertialSolutionStatus::INS_SOLUTION_GOOD)
         {
             ins_alignment_complete = true;
             ins_solution_good = true;
