@@ -392,7 +392,7 @@ void RayGroundFilter::Run()
   // VLP-16  |     0.1-0.4    |     2.0      |  -15.0<=x<=15.0   (30    / 0.52)
   // VLP-16HD|     0.1-0.4    |     1.33     |  -10.0<=x<=10.0   (20    / 0.35)
   ROS_INFO("Initializing Ground Filter, please wait...");
-  pnh_.param<std::string>("input_point_topic", input_point_topic_, "/points_raw");
+  pnh_.param<std::string>("input_point_topic", input_point_topic_, "points_raw");
   ROS_INFO("Input point_topic: %s", input_point_topic_.c_str());
 
   pnh_.param<std::string>("base_frame", base_frame_, "base_link");
@@ -427,16 +427,16 @@ void RayGroundFilter::Run()
   ROS_INFO("Radial Divisions: %d", (int)radial_dividers_num_);
 
   std::string no_ground_topic, ground_topic;
-  pnh_.param<std::string>("no_ground_point_topic", no_ground_topic, "/points_no_ground");
+  pnh_.param<std::string>("no_ground_point_topic", no_ground_topic, "points_no_ground");
   ROS_INFO("No Ground Output Point Cloud no_ground_point_topic: %s", no_ground_topic.c_str());
-  pnh_.param<std::string>("ground_point_topic", ground_topic, "/points_ground");
+  pnh_.param<std::string>("ground_point_topic", ground_topic, "points_ground");
   ROS_INFO("Only Ground Output Point Cloud ground_topic: %s", ground_topic.c_str());
 
   ROS_INFO("Subscribing to... %s", input_point_topic_.c_str());
   points_node_sub_ = nh_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
   config_node_sub_ =
-      nh_.subscribe("/config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
+      nh_.subscribe("config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
   groundless_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(no_ground_topic, 2);
   ground_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
