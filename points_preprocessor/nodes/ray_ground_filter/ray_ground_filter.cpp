@@ -374,11 +374,9 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
   publish_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
 }
 
-RayGroundFilter::RayGroundFilter() : tf_listener_(tf_buffer_)
+RayGroundFilter::RayGroundFilter() : nh_(), pnh_("~"), tf_listener_(tf_buffer_)
 
 {
-  nh_ = ros::NodeHandle();
-  pnh_ = ros::NodeHandle("~");
   health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh_, pnh_);
   health_checker_ptr_->ENABLE();
 }
