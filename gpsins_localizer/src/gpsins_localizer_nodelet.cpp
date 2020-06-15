@@ -35,21 +35,24 @@ void GpsInsLocalizerNl::onInit()
     this->velocity_pub = nh.advertise<geometry_msgs::TwistStamped>("current_velocity", 10);
 
     // Subscribers
-    this->inspva_sub.subscribe(this->nh, this->ins_data_topic_name, 10);
+    this->swri_inspva_sub.subscribe(this->nh, "gps/inspva", 10);
+    this->oem7_inspva_sub.subscribe(this->nh, "novatel/oem7/inspva", 10);
     this->imu_sub.subscribe(this->nh, this->imu_data_topic_name, 10);
-    this->sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10), this->inspva_sub, this->imu_sub);
-    this->sync->registerCallback(boost::bind(&GpsInsLocalizerNl::insDataCb, this, _1, _2));
+    this->swri_sync = new message_filters::Synchronizer<SwriSyncPolicy>(SwriSyncPolicy(10), this->swri_inspva_sub, this->imu_sub);
+    this->swri_sync->registerCallback(boost::bind(&GpsInsLocalizerNl::swriInsDataCb, this, _1, _2));
+    this->oem7_sync = new message_filters::Synchronizer<Oem7SyncPolicy>(Oem7SyncPolicy(10), this->oem7_inspva_sub, this->imu_sub);
+    this->oem7_sync->registerCallback(boost::bind(&GpsInsLocalizerNl::oem7InsDataCb, this, _1, _2));
 
     if (this->msl_height && this->mgrs_mode)
     {
-        this->bestpos_sub = nh.subscribe("novatel/oem7/bestpos", 1, &GpsInsLocalizerNl::bestposCb, this);
+        this->swri_bestpos_sub = nh.subscribe("gps/bestpos", 1, &GpsInsLocalizerNl::swriBestposCb, this);
+        this->oem7_bestpos_sub = nh.subscribe("novatel/oem7/bestpos", 1, &GpsInsLocalizerNl::oem7BestposCb, this);
     }
 }
 
 void GpsInsLocalizerNl::loadParams()
 {
     this->pnh.param<std::string>("imu_data_topic_name", this->imu_data_topic_name, "gps/imu");
-    this->pnh.param<std::string>("ins_data_topic_name", this->ins_data_topic_name, "novatel/oem7/inspva");
     this->pnh.param("broadcast_tfs", this->broadcast_tfs, true);
     this->pnh.param("create_map_frame", this->create_map_frame, false);
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
@@ -77,7 +80,37 @@ void GpsInsLocalizerNl::loadParams()
     ROS_INFO("Parameters Loaded");
 }
 
-void GpsInsLocalizerNl::insDataCb(
+void GpsInsLocalizerNl::swriInsDataCb(
+    const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
+    const sensor_msgs::Imu::ConstPtr& imu_msg)
+{
+    novatel_oem7_msgs::INSPVA oem7_msg;
+    oem7_msg.header = inspva_msg->header;
+    oem7_msg.latitude = inspva_msg->latitude;
+    oem7_msg.longitude = inspva_msg->longitude;
+    oem7_msg.height = inspva_msg->height;
+    oem7_msg.north_velocity = inspva_msg->north_velocity;
+    oem7_msg.east_velocity = inspva_msg->east_velocity;
+    oem7_msg.up_velocity = inspva_msg->up_velocity;
+    oem7_msg.roll = inspva_msg->roll;
+    oem7_msg.pitch = inspva_msg->pitch;
+    oem7_msg.azimuth = inspva_msg->azimuth;
+
+    oem7_msg.status.status = novatel_oem7_msgs::InertialSolutionStatus::INS_INACTIVE;
+    if (inspva_msg->status == "INS_ALIGNMENT_COMPLETE")
+    {
+        oem7_msg.status.status = novatel_oem7_msgs::InertialSolutionStatus::INS_ALIGNMENT_COMPLETE;
+    }
+    else if (inspva_msg->status == "INS_SOLUTION_GOOD")
+    {
+        oem7_msg.status.status = novatel_oem7_msgs::InertialSolutionStatus::INS_SOLUTION_GOOD;
+    }
+
+    novatel_oem7_msgs::INSPVA::ConstPtr oem7_msg_ptr(&oem7_msg);
+    oem7InsDataCb(oem7_msg_ptr, imu_msg);
+}
+
+void GpsInsLocalizerNl::oem7InsDataCb(
     const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
@@ -129,7 +162,13 @@ void GpsInsLocalizerNl::insDataCb(
     pubishVelocity(inspva_msg, imu_msg);
 }
 
-void GpsInsLocalizerNl::bestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg)
+void GpsInsLocalizerNl::swriBestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg)
+{
+    this->undulation = bestpos_msg->undulation;
+    this->received_undulation = true;
+}
+
+void GpsInsLocalizerNl::oem7BestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg)
 {
     this->undulation = bestpos_msg->undulation;
     this->received_undulation = true;

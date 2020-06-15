@@ -21,14 +21,17 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <novatel_gps_msgs/Inspva.h>
 #include <novatel_oem7_msgs/INSPVA.h>
+#include <novatel_gps_msgs/NovatelPosition.h>
 #include <novatel_oem7_msgs/BESTPOS.h>
 #include <novatel_oem7_msgs/InertialSolutionStatus.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Point.h>
 
-typedef message_filters::sync_policies::ApproximateTime<novatel_oem7_msgs::INSPVA, sensor_msgs::Imu> MySyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<novatel_gps_msgs::Inspva, sensor_msgs::Imu> SwriSyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<novatel_oem7_msgs::INSPVA, sensor_msgs::Imu> Oem7SyncPolicy;
 
 namespace gpsins_localizer {
 
@@ -42,9 +45,12 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     void loadParams();
 
     // Subscriber callbacks
-    void insDataCb(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
+    void swriInsDataCb(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
-    void bestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg);
+    void oem7InsDataCb(const novatel_oem7_msgs::INSPVA::ConstPtr& inspva_msg,
+        const sensor_msgs::Imu::ConstPtr& imu_msg);
+    void swriBestposCb(const novatel_gps_msgs::NovatelPosition::ConstPtr& bestpos_msg);
+    void oem7BestposCb(const novatel_oem7_msgs::BESTPOS::ConstPtr& bestpos_msg);
 
     // Util functions
     void broadcastTf(tf2::Transform transform, ros::Time stamp);
@@ -68,10 +74,13 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     tf2_ros::StaticTransformBroadcaster stf_bc;
 
     // Subscribers
-    ros::Subscriber bestpos_sub;
-    message_filters::Subscriber<novatel_oem7_msgs::INSPVA> inspva_sub;
+    ros::Subscriber swri_bestpos_sub;
+    ros::Subscriber oem7_bestpos_sub;
+    message_filters::Subscriber<novatel_gps_msgs::Inspva> swri_inspva_sub;
+    message_filters::Subscriber<novatel_oem7_msgs::INSPVA> oem7_inspva_sub;
     message_filters::Subscriber<sensor_msgs::Imu> imu_sub;
-    message_filters::Synchronizer<MySyncPolicy>* sync;
+    message_filters::Synchronizer<SwriSyncPolicy>* swri_sync;
+    message_filters::Synchronizer<Oem7SyncPolicy>* oem7_sync;
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener;
 
@@ -91,7 +100,6 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
 
     // Parameters
     std::string imu_data_topic_name = "gps/imu";
-    std::string ins_data_topic_name = "gps/inspva";
     bool broadcast_tfs = true;
     bool create_map_frame = false;
     bool publish_earth_gpsm_tf = false;
