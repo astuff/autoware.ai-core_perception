@@ -4,8 +4,8 @@ This ROS package is for providing a localization solution that relies only on
 GPS-INS data. An example of a GPS-INS system that provides this data is the
 [Novatel SPAN](https://www.novatel.com/products/span-gnss-inertial-systems/)
 system. Currently, this package supports two Novatel drivers:
-[`novatel_gps_driver`](https://github.com/swri-robotics/novatel_gps_driver) and [`novatel_oem7_driver`](https://github.com/novatel/novatel_oem7_driver)
-.
+[`novatel_gps_driver`](https://github.com/swri-robotics/novatel_gps_driver) and
+[`novatel_oem7_driver`](https://github.com/novatel/novatel_oem7_driver).
 However, it should be easy enough to add support for additional
 GPS drivers.
 
