@@ -106,7 +106,7 @@ void GpsInsLocalizerNl::swriInsDataCb(
         oem7_msg.status.status = novatel_oem7_msgs::InertialSolutionStatus::INS_SOLUTION_GOOD;
     }
 
-    novatel_oem7_msgs::INSPVA::ConstPtr oem7_msg_ptr(&oem7_msg);
+    novatel_oem7_msgs::INSPVA::ConstPtr oem7_msg_ptr(new novatel_oem7_msgs::INSPVA(oem7_msg));
     oem7InsDataCb(oem7_msg_ptr, imu_msg);
 }
 
