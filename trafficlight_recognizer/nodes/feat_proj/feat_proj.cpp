@@ -222,15 +222,13 @@ Point3 transform(const Point3& psrc, const tf::StampedTransform& tfsource)
  */
 bool project2(const Point3& pt, int* u, int* v, bool useOpenGLCoord = false)
 {
-  float nearPlane = 1.0;
-  float farPlane = 200.0;
   Point3 _pt = transform(pt, trf);
   float _u = _pt.x() * fx / _pt.z() + cx;
   float _v = _pt.y() * fy / _pt.z() + cy;
 
   *u = static_cast<int>(_u);
   *v = static_cast<int>(_v);
-  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < nearPlane || farPlane < _pt.z())
+  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < near_plane_ || far_plane_ < _pt.z())
   {
     *u = -1, *v = -1;
     return false;
