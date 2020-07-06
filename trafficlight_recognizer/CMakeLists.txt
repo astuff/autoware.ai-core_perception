@@ -7,45 +7,49 @@ find_package(autoware_msgs REQUIRED)
 
 find_package(vector_map REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
-        cmake_modules
-        cv_bridge
-        geometry_msgs
-        libvectormap
-        roscpp
-        roslint
-        sensor_msgs
-        std_msgs
-        tf
-        vector_map_server
-        visualization_msgs
-        autoware_msgs
-        vector_map
-        lanelet2_extension
-        )
+  autoware_msgs
+  camera_info_manager
+  cmake_modules
+  cv_bridge
+  geometry_msgs
+  image_transport
+  lanelet2_extension
+  libvectormap
+  roscpp
+  roslint
+  rospy
+  sensor_msgs
+  std_msgs
+  tf
+  vector_map
+  vector_map_server
+  visualization_msgs
+)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 QUIET)
 
 if (NOT EIGEN3_FOUND)
-    # Fallback to cmake_modules
-    find_package(cmake_modules REQUIRED)
-    find_package(Eigen REQUIRED)
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
-    set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
-    # Possibly map additional variables to the EIGEN3_ prefix.
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
 else ()
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif ()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-
 find_package(OpenGL REQUIRED)
+find_package(TinyXML REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -56,6 +60,8 @@ include_directories(
   ${Eigen3_INCLUDE_DIRS}
 )
 
+catkin_python_setup()
+
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS}
   CATKIN_DEPENDS
@@ -65,6 +71,7 @@ catkin_package(
   geometry_msgs
   libvectormap
   roscpp
+  rospy
   sensor_msgs
   std_msgs
   tf
@@ -73,6 +80,8 @@ catkin_package(
   visualization_msgs
 
   LIBRARIES libcontext
+
+  DEPENDS TinyXML
 )
 
 
@@ -81,6 +90,7 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
 roslint_cpp()
+roslint_python()
 
 ###########
 ## Build ##

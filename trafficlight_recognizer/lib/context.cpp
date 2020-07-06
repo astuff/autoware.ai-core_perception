@@ -1,12 +1,12 @@
 /*
  * Copyright 2019 Autoware Foundation
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,14 +45,16 @@ bool Context::CompareContext(const Context in_context_a, const Context in_contex
 } /* static bool compareContext() */
 
 void Context::SetContexts(std::vector<Context>* out_signal_contexts,
-                          const autoware_msgs::Signals::ConstPtr& in_lamp_signals_positions, const int in_image_height,
-                          const int in_image_width)
+                          const autoware_msgs::Signals::ConstPtr& in_lamp_signals_positions,
+                          const int in_image_height,
+                          const int in_image_width,
+                          bool id_swap)
 {
   /* copy parts of data to local variable */
   std::vector<autoware_msgs::ExtractedPosition> signals_lamps;
   std::vector<autoware_msgs::ExtractedPosition>::iterator lamp_iterator;
 
-  std::vector<int> lane_id_vector;
+  std::vector<int> id_vector;
 
   for (unsigned int i = 0; i < in_lamp_signals_positions->Signals.size(); i++)
   {
@@ -69,18 +71,26 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
     tmp_lamp_position.plId = in_lamp_signals_positions->Signals.at(i).plId;
     signals_lamps.push_back(tmp_lamp_position);
 
-    lane_id_vector.push_back(tmp_lamp_position.linkId);  // store lanes ids, to later identify signals contexts
+    // store lanes ids, to later identify signals contexts
+    if (id_swap)
+    {
+      id_vector.push_back(tmp_lamp_position.plId);
+    }
+    else
+    {
+      id_vector.push_back(tmp_lamp_position.linkId);
+    }
   }
 
   // get unique lane ids
-  std::sort(lane_id_vector.begin(), lane_id_vector.end());
-  std::vector<int>::iterator new_end = std::unique(lane_id_vector.begin(), lane_id_vector.end());
-  lane_id_vector.erase(new_end, lane_id_vector.end());
+  std::sort(id_vector.begin(), id_vector.end());
+  std::vector<int>::iterator new_end = std::unique(id_vector.begin(), id_vector.end());
+  id_vector.erase(new_end, id_vector.end());
 
   std::vector<Context> final_signal_contexts;
 
   // one traffic signal per lane, check each lane and find the bulb belonging to this lane (this signal Context)
-  for (unsigned int ctx_idx = 0; ctx_idx < lane_id_vector.size(); ctx_idx++)
+  for (unsigned int ctx_idx = 0; ctx_idx < id_vector.size(); ctx_idx++)
   {
     Context current_signal_context;
     int min_radius = INT_MAX;
@@ -91,6 +101,7 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
     current_signal_context.leftTurnSignal = false;
     current_signal_context.rightTurnSignal = false;
     current_signal_context.closestLaneId = -1;
+
     // check which lamps belong to this lane
     for (lamp_iterator = signals_lamps.begin(); lamp_iterator < signals_lamps.end(); lamp_iterator++)
     {
@@ -100,9 +111,16 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
       double map_y = lamp_iterator->y;
       double map_z = lamp_iterator->z;
       int radius = lamp_iterator->radius;
-      if (lamp_iterator->linkId == lane_id_vector.at(ctx_idx) && 0 < img_x - radius - 1.5 * radius &&
-          img_x + radius + 1.5 * radius < in_image_width && 0 < img_y - radius - 1.5 * radius &&
-          img_y + radius + 1.5 * radius < in_image_height)
+
+      int id;
+      if (id_swap)
+        id = lamp_iterator->plId;
+      else
+        id = lamp_iterator->linkId;
+
+      if (id == id_vector.at(ctx_idx) &&
+          0 < img_x - radius - 1.5 * radius && img_x + radius + 1.5 * radius < in_image_width &&
+          0 < img_y - radius - 1.5 * radius && img_y + radius + 1.5 * radius < in_image_height)
       {
         switch (lamp_iterator->type)
         {
@@ -142,6 +160,7 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
           default: /* this signal is not for cars (for pedestrian or something) */
             continue;
         }
+
         min_radius = (min_radius > radius) ? radius : min_radius;
         most_left = (most_left > img_x - radius - 1.5 * min_radius) ? img_x - radius - 1.5 * min_radius : most_left;
         most_top = (most_top > img_y - radius - 1.5 * min_radius) ? img_y - radius - 1.5 * min_radius : most_top;
@@ -149,7 +168,7 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
         most_bottom =
             (most_bottom < img_y + radius + 1.5 * min_radius) ? img_y + radius + 1.5 * min_radius : most_bottom;
       }  // end if check this lamp belong to this lane and visible
-    }    // end for to check if the lamp belongs to the lane
+    }  // end for to check if the lamp belongs to the lane
 
     current_signal_context.lampRadius = min_radius;
     current_signal_context.topLeft = cv::Point(most_left, most_top);
@@ -160,6 +179,7 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
     /* search whether this signal has already belonged in detector.out_signal_contexts */
     bool isInserted = false;
     std::vector<int> eraseCandidate;
+
     for (unsigned int i = 0; i < out_signal_contexts->size(); i++)
     {
       if (current_signal_context.signalID == out_signal_contexts->at(i).signalID &&
@@ -188,6 +208,7 @@ void Context::SetContexts(std::vector<Context>* out_signal_contexts,
   /* reset detector.out_signal_contexts */
   out_signal_contexts->clear();
   out_signal_contexts->resize(final_signal_contexts.size());
+
   for (unsigned int i = 0; i < final_signal_contexts.size(); i++)
   {
     out_signal_contexts->at(i) = final_signal_contexts.at(i);
