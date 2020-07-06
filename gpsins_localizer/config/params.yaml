@@ -1,8 +1,8 @@
 # Topic name for imu data
 imu_data_topic_name: gps/imu
 
-# Topic name for inspva data
-ins_data_topic_name: gps/inspva
+# Enable broadcasting of ROS transforms
+broadcast_tfs: true
 
 # Enable this to "plant" the origin of the map frame at the first received LLH
 # position. If an existing map frame is defined, this should not be set.
@@ -20,6 +20,10 @@ static_gps_frame: imu
 # Initialize without waiting for "INS_SOLUTION_GOOD" status from the Novatel
 # Use at your own risk
 no_solution_init: false
+
+# Enable to use height above mean sea level instead of height above WGS84 ellipsoid
+# Only works when mgrs_mode is true
+msl_height: false
 
 # MGRS mode is a simplified opertating mode that doesn't use ECEF and simply
 # localizes in an existing map frame that presumably represents the nearest
