@@ -228,7 +228,7 @@ bool project2(const Point3& pt, int* u, int* v, bool useOpenGLCoord = false)
 
   *u = static_cast<int>(_u);
   *v = static_cast<int>(_v);
-  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < near_plane_ || far_plane_ < _pt.z())
+  if (*u < 0 || imageWidth < *u || *v < 0 || imageHeight < *v || _pt.z() < nearPlane || farPlane < _pt.z())
   {
     *u = -1, *v = -1;
     return false;

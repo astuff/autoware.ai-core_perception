@@ -37,8 +37,11 @@ public:
   Context(cv::Point aRedCenter, cv::Point aYellowCenter, cv::Point aGreenCenter, int aLampRadius, cv::Point aTopLeft,
           cv::Point aBotRight);
 
-  static void SetContexts(std::vector<Context>* out_contexts, const autoware_msgs::Signals::ConstPtr& in_extracted_pos,
-                          const int in_image_height, const int in_image_width);
+  static void SetContexts(std::vector<Context>* out_contexts,
+                          const autoware_msgs::Signals::ConstPtr& in_extracted_pos,
+                          const int in_image_height,
+                          const int in_image_width,
+                          bool id_swap = false);
 
   cv::Point redCenter;
   cv::Point yellowCenter;
