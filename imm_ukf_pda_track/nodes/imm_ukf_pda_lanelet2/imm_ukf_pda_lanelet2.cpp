@@ -43,7 +43,7 @@ geometry_msgs::Pose getTransformedPose(const geometry_msgs::Pose& in_pose, const
 ImmUkfPdaLanelet2::ImmUkfPdaLanelet2()
   : target_id_(0), is_tracker_initialized_(false), frame_count_(0), has_loaded_lanelet_map_(false), private_nh_("~")
 {
-  private_nh_.param<std::string>("tracking_frame", tracking_frame_, "world");
+  private_nh_.param<std::string>("tracking_frame", tracking_frame_, "map");
   private_nh_.param<int>("life_time_threshold", param_.life_time_threshold_, 8);
   private_nh_.param<double>("gating_threshold", param_.gating_threshold_, 9.22);
   private_nh_.param<double>("gate_probability", param_.gate_probability_, 0.99);

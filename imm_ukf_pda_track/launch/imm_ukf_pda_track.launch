@@ -13,7 +13,7 @@
   <arg name="prevent_explosion_threshold" default="1000" />
   <arg name="static_num_history_threshold" default="3" />
   <arg name="static_velocity_threshold" default="0.5" />
-  <arg name="tracking_frame" default="world" />
+  <arg name="tracking_frame" default="map" />
   <arg name="use_sukf" default="false" />
 
   <!-- Map Args -->
