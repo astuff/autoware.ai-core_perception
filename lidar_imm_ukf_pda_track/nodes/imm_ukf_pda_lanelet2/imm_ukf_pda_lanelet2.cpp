@@ -101,7 +101,7 @@ void ImmUkfPdaLanelet2::callback(const autoware_msgs::DetectedObjectArray& input
   bool success = updateNecessaryTransform();
   if (!success)
   {
-    ROS_WARN("Could not find coordiante transformation");
+    ROS_WARN_THROTTLE(2, "Could not find coordinate transformation");
     return;
   }
 
@@ -123,25 +123,23 @@ bool ImmUkfPdaLanelet2::updateNecessaryTransform()
   bool success = true;
   try
   {
-    tf_listener_.waitForTransform(input_header_.frame_id, tracking_frame_, ros::Time(0), ros::Duration(1.0));
     tf_listener_.lookupTransform(tracking_frame_, input_header_.frame_id, ros::Time(0), tf_local2global_);
   }
   catch (tf::TransformException ex)
   {
-    ROS_ERROR("%s", ex.what());
+    ROS_ERROR_THROTTLE(2, "%s", ex.what());
     success = false;
   }
   if (use_map_info_ && has_loaded_lanelet_map_)
   {
     try
     {
-      tf_listener_.waitForTransform(map_frame_, tracking_frame_, ros::Time(0), ros::Duration(1.0));
       tf_listener_.lookupTransform(tracking_frame_, map_frame_, ros::Time(0), tf_map2tracking_);
       tf_tracking2map_ = tf_map2tracking_.inverse();
     }
     catch (tf::TransformException ex)
     {
-      ROS_ERROR("%s", ex.what());
+      ROS_ERROR_THROTTLE(2, "%s", ex.what());
       success = false;
     }
   }
