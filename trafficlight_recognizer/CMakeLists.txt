@@ -359,6 +359,48 @@ if(USE_CUDA)
   endif()
 endif()
 
+### TensorFlow TLR ###
+find_package(TensorFlow QUIET)
+
+if (TENSORFLOW_FOUND)
+  add_executable(
+    region_tlr_tensorflow
+    nodes/region_tlr_tensorflow/region_tlr_tensorflow.cpp
+  )
+
+  target_include_directories(
+    region_tlr_tensorflow PRIVATE
+    ${OpenCV_INCLUDE_DIRS}
+  )
+
+  target_link_libraries(
+    region_tlr_tensorflow
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    libcontext
+  )
+
+  add_dependencies(
+    region_tlr_tensorflow
+    ${catkin_EXPORTED_TARGETS}
+  )
+
+  install(
+    TARGETS region_tlr_tensorflow
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+  catkin_install_python(
+    PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+else ()
+  message("'tensorflow' is not installed. 'region_tlr_tensorflow' will not be build.")
+endif ()
+
+### Testing ###
+
 if(CATKIN_ENABLE_TESTING)
   roslint_add_test()
   find_package(rostest REQUIRED)
