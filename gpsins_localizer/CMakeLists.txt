@@ -4,7 +4,18 @@ project(gpsins_localizer)
 ## c++11 feature
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra ${CMAKE_CXX_FLAGS}")
 
-set(catkin_deps roscpp roslib nodelet tf2 tf2_ros novatel_gps_msgs sensor_msgs geometry_msgs roslint)
+set(catkin_deps
+    roscpp
+    roslib
+    nodelet
+    tf2
+    tf2_ros
+    novatel_gps_msgs
+    novatel_oem7_msgs
+    sensor_msgs
+    geometry_msgs
+    roslint
+)
 find_package(catkin REQUIRED ${catkin_deps})
 
 catkin_package(
