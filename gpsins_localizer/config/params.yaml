@@ -1,9 +1,6 @@
 # Topic name for imu data
 imu_data_topic_name: gps/imu
 
-# Topic name for inspva data
-ins_data_topic_name: gps/inspva
-
 # Enable broadcasting of ROS transforms
 broadcast_tfs: true
 
